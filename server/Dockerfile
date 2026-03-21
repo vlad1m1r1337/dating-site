@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y \
+    libmagic1 \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /usr/src/app
+
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+ARG ARG_DATABASE_URL
+ENV DATABASE_URL=$ARG_DATABASE_URL
+ARG ARG_EMAIL
+ENV EMAIL=$ARG_EMAIL
+ARG ARG_EMAIL_PASSWORD
+ENV EMAIL_PASSWORD=$ARG_EMAIL_PASSWORD
+ARG ARG_URL_FRONT
+ENV URL_FRONT=$ARG_URL_FRONT
+ARG ARG_URL_BACK
+ENV URL_BACK=$ARG_URL_BACK
+
+EXPOSE 8765
+
+CMD [ "python", "main.py" ]

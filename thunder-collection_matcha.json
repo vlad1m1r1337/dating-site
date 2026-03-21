@@ -1,0 +1,442 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "matcha",
+    "dateExported": "2024-01-13T23:23:07.877Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "name": "users",
+            "containerId": "",
+            "created": "2024-01-10T10:28:11.072Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "18dd1cce-ca7f-4065-8fa8-775096ac67dc",
+            "name": "email",
+            "containerId": "",
+            "created": "2024-01-10T10:28:33.092Z",
+            "sortNum": 20000
+        },
+        {
+            "_id": "1fa7dbbd-34b9-440e-bdb4-f2c75c136f22",
+            "name": "profiles",
+            "containerId": "",
+            "created": "2024-01-11T10:35:07.346Z",
+            "sortNum": 30000
+        },
+        {
+            "_id": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "interaction",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "created": "2024-01-12T09:09:52.083Z",
+            "sortNum": 40000
+        },
+        {
+            "_id": "46187ce6-b321-4721-b972-662e1b7e546e",
+            "name": "session",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "created": "2024-01-12T09:10:05.881Z",
+            "sortNum": 50000
+        },
+        {
+            "_id": "544bae1a-dc06-4275-9c99-f4fb2b0bcdce",
+            "name": "image",
+            "containerId": "",
+            "created": "2024-01-12T09:28:19.441Z",
+            "sortNum": 60000
+        },
+        {
+            "_id": "08ea7154-df88-4511-82b1-c30997b64ff6",
+            "name": "geoloc",
+            "containerId": "",
+            "created": "2024-01-13T23:03:50.300Z",
+            "sortNum": 70000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "79adba6b-c360-4ece-9817-8bdafc146f2b",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "46187ce6-b321-4721-b972-662e1b7e546e",
+            "name": "Login",
+            "url": "/user/login",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2024-01-10T09:04:39.209Z",
+            "modified": "2024-01-10T22:29:00.219Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token}}"
+                }
+            ]
+        },
+        {
+            "_id": "264202c2-316d-4e03-aabb-85fc1f4bd31b",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "46187ce6-b321-4721-b972-662e1b7e546e",
+            "name": "Logout",
+            "url": "/user/logout",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2024-01-10T09:08:06.869Z",
+            "modified": "2024-01-10T22:27:57.971Z",
+            "headers": [],
+            "params": [],
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "1",
+                    "action": "setto",
+                    "value": "{{token}}"
+                }
+            ]
+        },
+        {
+            "_id": "7c4ca595-b5c7-4acc-8ebe-3031205fb43d",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "name": "Create account",
+            "url": "/user",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2024-01-10T09:08:54.827Z",
+            "modified": "2024-01-10T23:45:12.087Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\",\n  \"email\": \"{{email}}\",\n  \"firstName\": \"{{first_name}}\",\n  \"lastName\": \"{{last_name}}\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "89b485d1-d707-4cba-bf4b-6b3ea4da5e40",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "18dd1cce-ca7f-4065-8fa8-775096ac67dc",
+            "name": "confirm email",
+            "url": "/email/confirm",
+            "method": "POST",
+            "sortNum": 30000,
+            "created": "2024-01-10T10:28:40.932Z",
+            "modified": "2024-01-10T10:33:40.714Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"token\": \"r2ZW8TSf4sYwKLBJaaYbLx0WdMu5bviAmYdVTwQLEexZOmZANn1TYH6qyIKepo5h\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "d96b6feb-2067-4ede-83cb-714d6c41e693",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "46187ce6-b321-4721-b972-662e1b7e546e",
+            "name": "Check session",
+            "url": "/user/session",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2024-01-10T11:39:14.887Z",
+            "modified": "2024-01-10T22:56:34.304Z",
+            "headers": [],
+            "params": [],
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.user_id",
+                    "action": "setto",
+                    "value": "{{user_id}}"
+                }
+            ]
+        },
+        {
+            "_id": "a953e553-7a84-4f45-815d-638592145490",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "18dd1cce-ca7f-4065-8fa8-775096ac67dc",
+            "name": "generate recovery email",
+            "url": "/email/password/new",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2024-01-10T11:10:01.055Z",
+            "modified": "2024-01-10T11:20:08.370Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"theo.nard18@gmail.com\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "d20707b2-51f7-45cc-b629-bc9f8c4780a6",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "18dd1cce-ca7f-4065-8fa8-775096ac67dc",
+            "name": "change password",
+            "url": "/email/password",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2024-01-10T11:20:13.515Z",
+            "modified": "2024-01-10T11:36:59.148Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"token\": \"F9UhKpW36jC3LfDeBPcxbwMwPk2lm0MSyeubfOL72oPXPdY641PN6AYg69CrYQGA\",\n  \"password\": \"Qw@rty123\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "78a44ffe-8fbb-4afd-9718-696c3c9c348d",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "name": "get user",
+            "url": "/user",
+            "method": "GET",
+            "sortNum": 70000,
+            "created": "2024-01-10T11:45:11.095Z",
+            "modified": "2024-01-10T11:46:12.201Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "b803c368-a8fe-4f22-bf46-9f188f2be8f1",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "name": "get specific user",
+            "url": "/user/{{user_id}}",
+            "method": "GET",
+            "sortNum": 90000,
+            "created": "2024-01-10T11:45:23.011Z",
+            "modified": "2024-01-12T11:15:33.997Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "33e684ea-caa0-4571-b099-b5bbd13ff5a6",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "1fa7dbbd-34b9-440e-bdb4-f2c75c136f22",
+            "name": "get profiles",
+            "url": "/profiles",
+            "method": "GET",
+            "sortNum": 100000,
+            "created": "2024-01-11T10:35:21.775Z",
+            "modified": "2024-01-12T09:18:02.803Z",
+            "headers": [],
+            "params": [],
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.profiles.0.id",
+                    "action": "setto",
+                    "value": "{{remote_id}}"
+                }
+            ]
+        },
+        {
+            "_id": "4e8e89e7-7d32-4029-916b-ae79d720d39b",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "778826e1-5f4b-40ea-95d8-75b1f0584b54",
+            "name": "update user",
+            "url": "/user",
+            "method": "PUT",
+            "sortNum": 110000,
+            "created": "2024-01-12T08:37:58.209Z",
+            "modified": "2024-01-13T22:55:42.981Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"theo.nard18@gmail.com\",\n  \"lastName\": \"Theo\",\n  \"firstName\": \"Nard\",\n  \"images\": [\n    \"https://back-matcha.pandeo.fr/image/bdc0b94b-3c7d-462d-804c-db10e1e71c10\",\n    \"https://back-matcha.pandeo.fr/image/bdc0b94b-3c7d-462d-804c-db10e1e71c10\",\n    \"https://back-matcha.pandeo.fr/image/bdc0b94b-3c7d-462d-804c-db10e1e71c10\",\n    \"https://back-matcha.pandeo.fr/image/bdc0b94b-3c7d-462d-804c-db10e1e71c10\",\n    \"https://back-matcha.pandeo.fr/image/bdc0b94b-3c7d-462d-804c-db10e1e71c10\"\n  ],\n  \"bio\": \"Oui\",\n  \"tags\": {\n    \"#cinema\": false,\n    \"#music\": false,\n    \"#bar\": false,\n    \"#hiking\": false,\n    \"#biking\": false,\n    \"#cooking\": false,\n    \"#photography\": true,\n    \"#gaming\": false,\n    \"#reading\": false,\n    \"#dancing\": false,\n    \"#painting\": false,\n    \"#skiing\": false,\n    \"#traveling\": false,\n    \"#yoga\": false,\n    \"#gardening\": false,\n    \"#fishing\": true,\n    \"#surfing\": false,\n    \"#golfing\": false,\n    \"#wine\": false,\n    \"#beer\": false,\n    \"#coffee\": true,\n    \"#tea\": false,\n    \"#running\": true,\n    \"#writing\": false,\n    \"#knitting\": false,\n    \"#crafting\": false,\n    \"#theater\": false,\n    \"#karaoke\": false,\n    \"#camping\": false,\n    \"#beach\": false,\n    \"#concerts\": true,\n    \"#museums\": false,\n    \"#boardgames\": false,\n    \"#puzzles\": false,\n    \"#astronomy\": false,\n    \"#stargazing\": false,\n    \"#fitness\": false,\n    \"#meditation\": false,\n    \"#poetry\": false,\n    \"#DIY\": false,\n    \"#technology\": false,\n    \"#vintage\": false,\n    \"#cars\": false,\n    \"#pets\": false,\n    \"#sailing\": false,\n    \"#rockclimbing\": false,\n    \"#foodie\": false,\n    \"#fashion\": false,\n    \"#history\": false,\n    \"#languages\": false,\n    \"#filmlovers\": true,\n    \"#musicians\": false,\n    \"#outdoorlife\": false,\n    \"#bookclub\": false,\n    \"#gamer\": false,\n    \"#literature\": false,\n    \"#art\": false,\n    \"#winetasting\": false,\n    \"#brewerytour\": false,\n    \"#teatime\": true,\n    \"#journaling\": false,\n    \"#campfire\": false,\n    \"#livemusic\": true,\n    \"#museum\": false,\n    \"#games\": true,\n    \"#mindfulness\": false,\n    \"#adventure\": false\n  },\n  \"age\": 20,\n  \"orientation\": \"heterosexual\",\n  \"gender\": \"male\",\n  \"geoloc\": \"48.88943490233389,2.362706249153936\"\n}",
+                "form": []
+            },
+            "tests": []
+        },
+        {
+            "_id": "4d3f4c48-c7b2-489f-990c-695743d8a44e",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "like",
+            "url": "/user/{{remote_id}}/like",
+            "method": "POST",
+            "sortNum": 120000,
+            "created": "2024-01-12T09:09:55.846Z",
+            "modified": "2024-01-12T11:41:02.170Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "02104cfa-d78d-4972-a10d-87a056aefcfa",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "544bae1a-dc06-4275-9c99-f4fb2b0bcdce",
+            "name": "upload",
+            "url": "/image/upload",
+            "method": "POST",
+            "sortNum": 130000,
+            "created": "2024-01-12T09:28:22.948Z",
+            "modified": "2024-01-12T10:29:37.284Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "formdata",
+                "raw": "",
+                "form": [],
+                "files": [
+                    {
+                        "name": "image",
+                        "value": "/home/iot/matcha/2Q.png"
+                    }
+                ]
+            },
+            "tests": []
+        },
+        {
+            "_id": "5283cda9-e02a-410a-a3d1-92c823e0ddb8",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "block",
+            "url": "/user/{{remote_id}}/block",
+            "method": "POST",
+            "sortNum": 135000,
+            "created": "2024-01-12T13:13:46.386Z",
+            "modified": "2024-01-12T13:13:59.084Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "7495b7ee-4cc4-4ca7-be76-9815064daf36",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "544bae1a-dc06-4275-9c99-f4fb2b0bcdce",
+            "name": "fetch",
+            "url": "/image/{{image_id}}",
+            "method": "GET",
+            "sortNum": 140000,
+            "created": "2024-01-12T10:17:21.951Z",
+            "modified": "2024-01-12T11:16:45.003Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "d71969af-e9c1-4b88-9e30-087f13b3f07b",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "skip",
+            "url": "/user/{{remote_id}}/skip",
+            "method": "POST",
+            "sortNum": 142500,
+            "created": "2024-01-12T13:14:06.436Z",
+            "modified": "2024-01-12T13:14:14.296Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "75b57c4d-bb93-4967-8246-a8fef7b9f520",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "report",
+            "url": "/user/{{remote_id}}/report",
+            "method": "POST",
+            "sortNum": 146250,
+            "created": "2024-01-12T13:54:46.613Z",
+            "modified": "2024-01-12T13:54:57.508Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "771ba16d-f516-483b-bed7-6c26a4b3242d",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "like",
+            "url": "/user/{{remote_id}}/like",
+            "method": "DELETE",
+            "sortNum": 150000,
+            "created": "2024-01-12T11:28:03.258Z",
+            "modified": "2024-01-12T11:29:29.825Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "c214cf58-8086-4003-b55a-65729f6122a7",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "skip",
+            "url": "/user/{{remote_id}}/skip",
+            "method": "DELETE",
+            "sortNum": 160000,
+            "created": "2024-01-12T13:13:45.012Z",
+            "modified": "2024-01-12T13:14:31.111Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "10283abe-02c4-47f1-ae72-87f860df1c00",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "a7e1ad35-b984-4463-b0de-f82ea7a37c53",
+            "name": "block",
+            "url": "/user/{{remote_id}}/block",
+            "method": "DELETE",
+            "sortNum": 170000,
+            "created": "2024-01-12T13:14:17.930Z",
+            "modified": "2024-01-12T13:14:17.930Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        },
+        {
+            "_id": "93d867db-7ae5-4377-acfe-66c94bdaaa91",
+            "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+            "containerId": "08ea7154-df88-4511-82b1-c30997b64ff6",
+            "name": "get",
+            "url": "/geoloc",
+            "method": "GET",
+            "sortNum": 180000,
+            "created": "2024-01-13T23:04:15.111Z",
+            "modified": "2024-01-13T23:04:21.325Z",
+            "headers": [],
+            "params": [],
+            "tests": []
+        }
+    ],
+    "settings": {
+        "auth": {
+            "type": "bearer",
+            "bearer": "{{token}}"
+        },
+        "options": {
+            "baseUrl": "https://back-matcha.pandeo.fr"
+        },
+        "preReq": {
+            "runRequests": [
+                {
+                    "reqId": "79adba6b-c360-4ece-9817-8bdafc146f2b",
+                    "colId": "6bdadd10-9d8d-40c8-bfd7-8a0eb726dafc",
+                    "triggerCondition": "run-var-value",
+                    "triggerValue": "{{token}}=1"
+                }
+            ]
+        },
+        "envId": "90d3b50d-fdd1-49fa-8f68-62905a68634e"
+    }
+}

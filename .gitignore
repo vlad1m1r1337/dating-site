@@ -1,0 +1,56 @@
+__pycache__
+*.pyc
+*.pyo
+
+# Dependencies
+node_modules/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+
+# Build outputs
+dist/
+build/
+*.egg-info/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+server/.env
+client/.env
+.env
+.idea/
+*.swp
+*.swo
+
+# Database
+*.sql.bak
+pgdata/
+db/db.sql
+db/db.tar.gz
+
+# Python
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Vite
+*.local
+
+# Docker
+.dockerignore
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+venv/
