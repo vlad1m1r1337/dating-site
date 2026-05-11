@@ -44,7 +44,7 @@ async def get_chat_rooms(db, user, limit: int = 50, offset: int = 0):
         if cid not in messages_map:
             messages_map[cid] = []
         messages_map[cid].append({
-            "sender": str(msg["user_id"]),
+            "user_id": str(msg["user_id"]),
             "content": bleach.clean(msg["content"], tags=[], strip=True),
             "date": msg["date"],
         })

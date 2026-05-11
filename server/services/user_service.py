@@ -6,8 +6,10 @@ from responses.errors.errors_409 import *
 from responses.errors.errors_422 import *
 from responses.errors.errors_401 import *
 from constants.domain import URL_BACK, URL_FRONT
+from constants.email import EMAIL
 from responses.errors.errors_404 import user_not_found
 from constants.tags import TAGS
+from constants.common_passwords import COMMON_PASSWORDS
 from controllers.notifications_controller import notification
 from services.email_service import *
 from utils.sanitize import sanitize_body
@@ -44,6 +46,10 @@ def check_password(password):
     regex = r"^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,30}$"
     if not re.match(regex, password):
         return invalid_password()
+    # Reject commonly used dictionary passwords
+    stripped = re.sub(r'[^a-zA-Z]', '', password).lower()
+    if stripped in COMMON_PASSWORDS or password.lower() in COMMON_PASSWORDS:
+        return JSONResponse(status_code=422, content={"message": "This password is too common, please choose a stronger one"})
     return None
 
 
@@ -495,6 +501,8 @@ async def is_skipped(db, origin, recipient):
 
 async def like(db, origin, recipient):
     try:
+        if not origin["images"] or len(origin["images"]) == 0:
+            return JSONResponse(status_code=400, content={"message": "You must have a profile picture to like someone"})
         if await is_liked(db, origin, recipient):
             return already_liked()
         if await is_blocked(db, origin, recipient):
@@ -694,7 +702,7 @@ async def report(db, origin, recipient, body):
         await db.execute("""INSERT INTO interactions (id, origin, recipient, type, date) VALUES ($1, $2, $3, $4, $5)""", id, origin["id"], recipient["id"], "report", datetime.datetime.now().timestamp())
         await block(db, origin, recipient)
         await send_email(
-            "theo.nard18@gmail.com",
+            EMAIL["email"],
             "Report",
             "User " + origin["username"] + " reported user " + recipient["username"] + "\n\nMessage : \n\n" + body["message"],
         )
@@ -706,7 +714,7 @@ async def report(db, origin, recipient, body):
 async def get_views_by_user(db, user):
     try:
         result = await db.fetch(
-            """SELECT * FROM interactions WHERE recipient = $1""",
+            """SELECT * FROM interactions WHERE recipient = $1 AND type = 'view'""",
             user["id"],
         )
         if not result:

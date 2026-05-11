@@ -17,7 +17,7 @@ from utils.parse_request import *
 from responses.errors.errors_422 import *
 from responses.errors.errors_400 import *
 
-image_controller = APIRouter(prefix="/image", tags=["email"])
+image_controller = APIRouter(prefix="/image", tags=["image"])
 
 
 @image_controller.post("/upload")

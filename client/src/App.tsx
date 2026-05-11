@@ -18,19 +18,24 @@ function App() {
   const [statusList, setStatusList] = useState<any>([])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f0f' }}>
+    <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column' }}>
       <Router>
         <Header setStatusList={setStatusList} setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />
-        <Routes>
-          <Route path="/" element={<HomePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} statusList={statusList} />} />
-          <Route path="/register" element={<RegisterPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
-          <Route path="/login" element={<LoginPage setErrorAlert={setErrorAlert} />} />
-          <Route path="/validate-email/:id" element={<ValidateEmailPage />} />
-          <Route path="/reset-password/:id" element={<ResetPasswordPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
-          <Route path="/reset-password" element={<ResetPasswordPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
-          <Route path="/profile" element={<ProfilePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <main style={{ flex: 1 }}>
+          <Routes>
+            <Route path="/" element={<HomePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} statusList={statusList} />} />
+            <Route path="/register" element={<RegisterPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
+            <Route path="/login" element={<LoginPage setErrorAlert={setErrorAlert} />} />
+            <Route path="/validate-email/:id" element={<ValidateEmailPage />} />
+            <Route path="/reset-password/:id" element={<ResetPasswordPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
+            <Route path="/reset-password" element={<ResetPasswordPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
+            <Route path="/profile" element={<ProfilePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+        <footer style={{ textAlign: 'center', padding: '16px', borderTop: '1px solid #2a2a2a', color: '#666', fontSize: '0.85rem' }}>
+          © {new Date().getFullYear()} Matcha — 42 School Project
+        </footer>
         <ErrorAlert errorAlert={errorAlert} setErrorAlert={setErrorAlert} />
         <SuccessAlert successAlert={successAlert} setSuccessAlert={setSuccessAlert} />
       </Router>
