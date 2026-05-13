@@ -59,7 +59,10 @@ class ConnectionManager:
 
 notification_socket = ConnectionManager()
 
-@notifications_controller.websocket("")
+@notifications_controller.websocket(
+    "",
+    name="WebSocket уведомлений (token в query)",
+)
 async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
     if websocket.query_params.get("token") is None:
         await websocket.close(reason="Invalid token")

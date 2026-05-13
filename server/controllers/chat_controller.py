@@ -15,6 +15,15 @@ from utils.parse_request import parse_request
 from services.chat_service import check_room, get_chat_rooms
 from services.user_service import get_token, search_user_by_token
 from controllers.notifications_controller import notification_socket
+from schemas import (
+    SendMessageRequest,
+    ChatRoomsResponse,
+    MessageResponse,
+    ErrorResponse,
+    bearer_security,
+    auth_responses,
+    body_responses,
+)
 
 chat_controller = APIRouter(prefix="/chat", tags=["chat"])
 
@@ -43,7 +52,10 @@ class ConnectionManager:
 
 chat_socket = ConnectionManager()
 
-@chat_controller.websocket("")
+@chat_controller.websocket(
+    "",
+    name="WebSocket чата (token в query)",
+)
 async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
     if websocket.query_params.get("token") is None:
         await websocket.close(reason="Invalid token")
@@ -63,7 +75,17 @@ async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
         if chat_socket:
             chat_socket.disconnect(websocket)
 
-@chat_controller.get("")
+@chat_controller.get(
+    "",
+    summary="Список чат‑комнат текущего пользователя",
+    description="Возвращает пагинированный список чат-комнат пользователя.",
+    response_model=ChatRoomsResponse,
+    responses={
+        **auth_responses,
+        404: {"model": ErrorResponse, "description": "У пользователя нет чат-комнат"},
+    },
+    openapi_extra={"security": bearer_security},
+)
 async def get_rooms(request: Request, db=Depends(get_database), limit: int = 50, offset: int = 0):
     token = get_token(request.headers)
     if token is None:
@@ -78,7 +100,32 @@ async def get_rooms(request: Request, db=Depends(get_database), limit: int = 50,
         return no_chat_rooms()
     return {"count": len(chat), "rooms": chat}
 
-@chat_controller.post("/{id}/message")
+@chat_controller.post(
+    "/{id}/message",
+    summary="Отправить сообщение в чат",
+    description=(
+        "Сохраняет сообщение в комнату с id `{id}` и отправляет его обоим участникам "
+        "по WebSocket. HTML-теги вырезаются. Максимум 400 символов."
+    ),
+    response_model=MessageResponse,
+    responses={
+        **auth_responses,
+        404: {
+            "model": ErrorResponse,
+            "description": "Комната не найдена / сообщение пустое или слишком длинное",
+        },
+        **body_responses,
+    },
+    openapi_extra={
+        "security": bearer_security,
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {"schema": SendMessageRequest.model_json_schema()}
+            },
+        },
+    },
+)
 async def add_message(id, request: Request, db=Depends(get_database)):
     token = get_token(request.headers)
     if token is None:

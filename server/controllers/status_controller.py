@@ -7,6 +7,8 @@ from responses.errors.errors_409 import *
 from responses.errors.errors_422 import *
 from responses.errors.errors_401 import *
 
+from schemas import StatusResponse, bearer_security, auth_responses
+
 status_controller = APIRouter(prefix="/status", tags=["status"])
 
 async def search_user_by_id(db, user_id):
@@ -71,7 +73,10 @@ class ConnectionManager:
 
 status_socket = ConnectionManager()
 
-@status_controller.websocket("")
+@status_controller.websocket(
+    "",
+    name="WebSocket онлайн-статусов (token в query)",
+)
 async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
     if websocket.query_params.get("token") is None:
         await websocket.close(reason="Invalid token")
@@ -94,7 +99,14 @@ async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
 async def notification(user_id, message):
     await status_socket.send(user_id, message)
     
-@status_controller.get("")
+@status_controller.get(
+    "",
+    summary="Список онлайн-пользователей",
+    description="Возвращает количество и список id пользователей, подключённых по WebSocket статусов.",
+    response_model=StatusResponse,
+    responses={**auth_responses},
+    openapi_extra={"security": bearer_security},
+)
 async def test(request: Request, db=Depends(get_database)):
     # emit notification
     token = get_token(request.headers)

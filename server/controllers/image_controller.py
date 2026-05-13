@@ -16,11 +16,48 @@ from services.user_service import (
 from utils.parse_request import *
 from responses.errors.errors_422 import *
 from responses.errors.errors_400 import *
+from schemas import (
+    MessageResponse,
+    ErrorResponse,
+    bearer_security,
+    auth_responses,
+    body_responses,
+)
 
 image_controller = APIRouter(prefix="/image", tags=["image"])
 
 
-@image_controller.post("/upload")
+@image_controller.post(
+    "/upload",
+    summary="Загрузить изображение пользователя",
+    description=(
+        "Принимает `multipart/form-data` с файлом картинки. "
+        "Ограничено 20 запросами в минуту с IP. Требует Bearer токен."
+    ),
+    response_model=MessageResponse,
+    responses={**auth_responses, **body_responses},
+    openapi_extra={
+        "security": bearer_security,
+        "requestBody": {
+            "required": True,
+            "content": {
+                "multipart/form-data": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "image": {
+                                "type": "string",
+                                "format": "binary",
+                                "description": "Файл изображения (jpg/png)",
+                            }
+                        },
+                        "required": ["image"],
+                    }
+                }
+            },
+        },
+    },
+)
 @limiter.limit("20/minute")
 async def upload_image(request: Request, db=Depends(get_database)):
     data = {}
@@ -39,7 +76,18 @@ async def upload_image(request: Request, db=Depends(get_database)):
     return await image_upload(db, user, data["form"])
 
 
-@image_controller.get("/{id}")
+@image_controller.get(
+    "/{id}",
+    summary="Получить изображение по id",
+    description="Возвращает бинарный контент изображения, mime-тип определяется автоматически.",
+    responses={
+        200: {
+            "description": "Файл изображения",
+            "content": {"image/*": {"schema": {"type": "string", "format": "binary"}}},
+        },
+        404: {"model": ErrorResponse, "description": "Изображение не найдено"},
+    },
+)
 async def get_image(id, request: Request, db=Depends(get_database)):
     try:
         image = await db.fetchrow("SELECT image FROM images WHERE id = $1", id)
@@ -47,5 +95,5 @@ async def get_image(id, request: Request, db=Depends(get_database)):
         return image_not_found()
     if not image:
         return image_not_found()
-    content = image["image"]._bytes
+    content = bytes(image["image"])
     return Response(content, media_type=magic.from_buffer(content, mime=True))
