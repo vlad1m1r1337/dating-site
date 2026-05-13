@@ -9,10 +9,22 @@ from responses.errors.errors_400 import *
 import httpx
 import geopy.distance
 
+from schemas import GeolocResponse, bearer_security, auth_responses
+
 geoloc_controller = APIRouter(prefix="/geoloc", tags=["geoloc"])
 
 
-@geoloc_controller.get("")
+@geoloc_controller.get(
+    "",
+    summary="Определить геолокацию пользователя",
+    description=(
+        "Возвращает приблизительные координаты пользователя по IP. "
+        "При ошибке внешнего сервиса вернёт `{lat: 0, lng: 0}`."
+    ),
+    response_model=GeolocResponse,
+    responses={**auth_responses},
+    openapi_extra={"security": bearer_security},
+)
 async def get_geoloc(request: Request, db=Depends(get_database)):
     data = await parse_request(request)
     token = get_token(data["headers"])

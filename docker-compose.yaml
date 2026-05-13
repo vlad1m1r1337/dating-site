@@ -28,7 +28,8 @@ services:
     build:
       context: ./server
       args:
-       - ARG_DATABASE_URL=${DATABASE_URL}
+       # Имя matcha-db доступно только внутри сети compose, не из .env с localhost
+       - ARG_DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@matcha-db:5432/${DB_NAME}
        - ARG_EMAIL=${EMAIL}
        - ARG_EMAIL_PASSWORD=${EMAIL_PASSWORD}
        - ARG_URL_FRONT=${URL_FRONT}

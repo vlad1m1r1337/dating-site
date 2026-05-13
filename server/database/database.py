@@ -1,7 +1,12 @@
 import asyncpg
 import os
+from pathlib import Path
+
 import dotenv
 
+# Корневой .env при запуске из server/ (иначе не находится postgresql://...@localhost:5433)
+_repo_root = Path(__file__).resolve().parents[2]
+dotenv.load_dotenv(_repo_root / ".env")
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
 
