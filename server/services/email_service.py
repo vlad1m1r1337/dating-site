@@ -1,8 +1,12 @@
+import logging
+
 import aiosmtplib
 from constants.email import EMAIL
 
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+logger = logging.getLogger(__name__)
 
 
 async def send_email(email, subject, body):
@@ -21,6 +25,12 @@ async def send_email(email, subject, body):
         await smtp.send_message(msg)
         await smtp.quit()
         return True
-    except Exception as e:
-        print(e)
+    except Exception:
+        logger.exception(
+            "SMTP send failed (host=%s port=%s from=%s to=%s)",
+            EMAIL["host"],
+            EMAIL["port"],
+            EMAIL["email"],
+            email,
+        )
         return False

@@ -187,7 +187,8 @@ async def create_user(db, body: dict):
             + "validate-email/"
             + token_id
         )
-        await send_email(body["email"], subject, content)
+        result = await send_email(body["email"], subject, content)
+        print(f"Email send result: {result}")
         return account_created()
 
     except Exception as e:
