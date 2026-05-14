@@ -89,7 +89,12 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
             for (let i = 0; i < res.data.images.length; i++) {
                 imgLoadingArray.push(i)
             }
-            const { id, username, completion, ...filteredData } = res.data
+            const filteredData = _.omit(res.data, [
+                "id",
+                "username",
+                "completion",
+                "last_login",
+            ]) as UpdateForm
             filteredData.images = filteredData.images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img)
             setFormBackup(filteredData)
             setForm(filteredData)
