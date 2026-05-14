@@ -108,6 +108,6 @@ class UserSelfResponse(BaseModel):
     gender: str
     age: int
     elo: int
-    geoloc: list[float]
+    geoloc: str
     completion: int
     last_login: int

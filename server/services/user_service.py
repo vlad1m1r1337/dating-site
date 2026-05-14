@@ -27,10 +27,11 @@ def strip_user(user):
     tags = user["tags"] if isinstance(user["tags"], dict) else json.loads(user["tags"])
     raw_geoloc = user["geoloc"]
     if isinstance(raw_geoloc, str):
-        parts = raw_geoloc.split(",")
-        geoloc = [float(parts[0]), float(parts[1])] if len(parts) == 2 else [0.0, 0.0]
-    else:
         geoloc = raw_geoloc
+    elif isinstance(raw_geoloc, (list, tuple)) and len(raw_geoloc) == 2:
+        geoloc = f"{raw_geoloc[0]},{raw_geoloc[1]}"
+    else:
+        geoloc = "0,0"
     return {
         "id": str(user["id"]),
         "email": user["email"],
