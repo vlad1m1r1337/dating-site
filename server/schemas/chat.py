@@ -13,11 +13,23 @@ class SendMessageRequest(BaseModel):
     )
 
 
+class ChatUser(BaseModel):
+    id: str
+    firstName: str
+    image: str | None = None
+
+
+class ChatMessage(BaseModel):
+    user_id: str
+    content: str
+    date: int
+
+
 class ChatRoom(BaseModel):
     id: str
-    user_1: str
-    user_2: str
-    last_message: str | None = None
+    user_1: ChatUser | None = None
+    user_2: ChatUser | None = None
+    messages: list[ChatMessage] = []
 
 
 class ChatRoomsResponse(BaseModel):
