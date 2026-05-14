@@ -24,21 +24,29 @@ import string
 def strip_user(user):
     if not user:
         return None
+    tags = user["tags"] if isinstance(user["tags"], dict) else json.loads(user["tags"])
+    raw_geoloc = user["geoloc"]
+    if isinstance(raw_geoloc, str):
+        parts = raw_geoloc.split(",")
+        geoloc = [float(parts[0]), float(parts[1])] if len(parts) == 2 else [0.0, 0.0]
+    else:
+        geoloc = raw_geoloc
     return {
-        "id": user["id"],
+        "id": str(user["id"]),
         "email": user["email"],
         "username": user["username"],
         "firstName": user["first_name"],
         "lastName": user["last_name"],
-        "images": user["images"] if user["images"] else [],
+        "images": [str(i) for i in user["images"]] if user["images"] else [],
         "completion": user["completion"],
         "gender": user["gender"],
         "orientation": user["orientation"],
-        "tags": json.loads(user["tags"]),
+        "tags": tags,
         "bio": user["bio"] if user["bio"] else "",
-        "geoloc": user["geoloc"],
+        "geoloc": geoloc,
         "age": user["age"],
-        "elo": user["elo"]
+        "elo": user["elo"],
+        "last_login": int(user["last_activity"]) if user["last_activity"] else 0,
     }
 
 

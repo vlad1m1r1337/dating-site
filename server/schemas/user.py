@@ -95,9 +95,19 @@ class UserPublicResponse(BaseModel):
     }
 
 
-class UserSelfResponse(UserPublicResponse):
+class UserSelfResponse(BaseModel):
+    id: str
+    firstName: str
+    lastName: str
     username: str
     email: EmailStr
-    lastName: str
+    bio: str
+    images: list[str]
+    tags: dict[str, bool]
+    orientation: str
+    gender: str
+    age: int
+    elo: int
     geoloc: list[float]
     completion: int
+    last_login: int
