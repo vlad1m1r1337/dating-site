@@ -419,7 +419,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                             <LoadingButton
                                 variant="contained"
                                 color="primary"
-                                disabled={_.isEqual(form, formBackup) || emailError || firstnameError || tagsError || lastnameError || geolocError || form.images.length < 1}
+                                disabled={emailError || firstnameError || tagsError || lastnameError || geolocError || form.images.length < 1}
                                 loading={isSubmitting}
                                 size="medium"
                                 style={{ width: "fit-content" }}
