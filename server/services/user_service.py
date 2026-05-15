@@ -182,10 +182,9 @@ async def create_user(db, body: dict):
         )
         subject = "Welcome to Adopt A Goose"
         content = (
-            "Welcome to Adopt A Goose, please click on the following link to validate your email address: "
-            + str(URL_FRONT)
-            + "validate-email/"
-            + token_id
+            f"Welcome to Adopt A Goose, please click on the following link "
+            f"to validate your email address: "
+            f"{URL_FRONT}/validate-email/{token_id}"
         )
         result = await send_email(body["email"], subject, content)
         print(f"Email send result: {result}")
