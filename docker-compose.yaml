@@ -20,6 +20,8 @@ services:
     restart: always
   matcha-server:
     container_name: matcha-server
+    env_file:
+      - .env
     networks:
       - matcha-network
     depends_on:

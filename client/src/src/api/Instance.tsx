@@ -7,7 +7,7 @@ const defaultOptions = {
 	},
 };
 
-let instance = axios.create(defaultOptions);
+const instance = axios.create(defaultOptions);
 
 instance.interceptors.request.use(function (config) {
 	const token = localStorage.getItem('token');

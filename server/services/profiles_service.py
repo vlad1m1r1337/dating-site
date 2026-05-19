@@ -1,6 +1,5 @@
 import json
 from responses.errors.errors_400 import *
-from responses.errors.errors_404 import no_profile
 from constants.tags import TAGS
 import geopy.distance
 
@@ -49,7 +48,7 @@ async def get_profiles_filtered(db, user, _filter):
     )
     hidden_ids = {row["recipient"] for row in skip_like_rows}
 
-    user_tags = json.loads(user["tags"])
+    user_tags = user["tags"] if isinstance(user["tags"], dict) else json.loads(user["tags"])
     new_list = []
 
     for i in result:
@@ -87,7 +86,7 @@ async def get_profiles_filtered(db, user, _filter):
             continue
 
         # Общие теги
-        other_tags = json.loads(i["tags"])
+        other_tags = i["tags"] if isinstance(i["tags"], dict) else json.loads(i["tags"])
         common_tags = [k for k in user_tags if user_tags.get(k) and other_tags.get(k)]
 
         if len(common_tags) < _filter["min_tags"]:
@@ -114,8 +113,5 @@ async def get_profiles_filtered(db, user, _filter):
 
         if len(new_list) >= 50:
             break
-
-    if not new_list:
-        return no_profile()
 
     return {"count": len(new_list), "profiles": new_list}

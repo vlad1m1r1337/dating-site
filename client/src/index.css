@@ -2,8 +2,9 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
+  height: 100vh;
   background-color: #0f0f0f;
+  overflow: hidden;
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
@@ -13,26 +14,26 @@ body::-webkit-scrollbar { display: none; }
 
 #root {
   width: 100%;
-  min-height: 100vh;
+  height: 100vh;
   font-family: 'Roboto', sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
 .imgProfile {
   width: 100%;
-  min-height: 500px;
-  max-height: 500px;
-  object-fit: cover;
+  height: 25vh;
+  max-height: 25vh;
+  object-fit: contain;
   object-position: center;
   border-radius: 6px;
   color: transparent;
+  background-color: #000;
 }
 
 .profileViewer {
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 632px;
   margin-top: 38px;
   overflow-y: scroll;
   margin-bottom: 56px;
@@ -49,11 +50,11 @@ body::-webkit-scrollbar { display: none; }
 
 .profileViewer .reportButton {
   position: absolute;
-  bottom: 4px;
+  bottom: 60px;
   left: 4px;
   padding: 0;
   min-width: 0 !important;
-  color: #ff000049;
+  color: #cf0808;
 }
 .profileViewer .reportButton:hover { color: #ff0000; }
 
@@ -86,7 +87,7 @@ body::-webkit-scrollbar { display: none; }
   justify-content: space-between;
   width: 140px;
   position: absolute;
-  bottom: 10px;
+  bottom: 60px;
   left: calc(50% - 70px);
   padding: 4px;
   border-radius: 360px;
@@ -196,15 +197,37 @@ body::-webkit-scrollbar { display: none; }
   align-items: center;
 }
 
+.draggableImgMosaicContainer {
+  cursor: grab;
+}
+
+.draggableImgMosaicContainer:active {
+  cursor: grabbing;
+}
+
 hr { border-color: #2a2a2a !important; }
 
 .homePage {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 750px;
-  height: calc(100vh - 64px);
+  min-height: 0;
+  height: 100%;
   position: relative;
+}
+
+.homePageContent {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  height: calc(100% - 28px);
+  min-height: 0;
+}
+
+.homePageCardContent {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
 }
 
 .homePage .filtersButton {

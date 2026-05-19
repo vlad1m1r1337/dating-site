@@ -10,7 +10,7 @@ from responses.errors.errors_400 import *
 from responses.errors.errors_409 import *
 from responses.errors.errors_422 import *
 from responses.errors.errors_401 import *
-from responses.errors.errors_404 import message_not_found, message_too_long, no_chat_rooms, room_not_found
+from responses.errors.errors_404 import message_not_found, message_too_long, room_not_found
 from utils.parse_request import parse_request
 from services.chat_service import check_room, get_chat_rooms
 from services.user_service import get_token, search_user_by_token
@@ -80,10 +80,7 @@ async def websocket_endpoint(websocket: WebSocket, db=Depends(get_database)):
     summary="Список чат‑комнат текущего пользователя",
     description="Возвращает пагинированный список чат-комнат пользователя.",
     response_model=ChatRoomsResponse,
-    responses={
-        **auth_responses,
-        404: {"model": ErrorResponse, "description": "У пользователя нет чат-комнат"},
-    },
+    responses={**auth_responses},
     openapi_extra={"security": bearer_security},
 )
 async def get_rooms(request: Request, db=Depends(get_database), limit: int = 50, offset: int = 0):
@@ -96,8 +93,6 @@ async def get_rooms(request: Request, db=Depends(get_database), limit: int = 50,
     limit = max(1, min(limit, 100))
     offset = max(0, offset)
     chat = await get_chat_rooms(db, user, limit=limit, offset=offset)
-    if not chat:
-        return no_chat_rooms()
     return {"count": len(chat), "rooms": chat}
 
 @chat_controller.post(

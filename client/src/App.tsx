@@ -18,10 +18,10 @@ function App() {
   const [statusList, setStatusList] = useState<any>([])
 
   return (
-    <div style={{ minHeight: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ height: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Router>
         <Header setStatusList={setStatusList} setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />
-        <main style={{ flex: 1 }}>
+        <main style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
           <Routes>
             <Route path="/" element={<HomePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} statusList={statusList} />} />
             <Route path="/register" element={<RegisterPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
@@ -33,7 +33,7 @@ function App() {
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
-        <footer style={{ textAlign: 'center', padding: '16px', borderTop: '1px solid #2a2a2a', color: '#666', fontSize: '0.85rem' }}>
+        <footer style={{ flexShrink: 0, textAlign: 'center', padding: '16px', borderTop: '1px solid #2a2a2a', color: '#666', fontSize: '0.85rem' }}>
           © {new Date().getFullYear()} Matcha — 42 School Project
         </footer>
         <ErrorAlert errorAlert={errorAlert} setErrorAlert={setErrorAlert} />

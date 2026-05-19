@@ -170,6 +170,10 @@ const Chat = ({ statusList }: ChatProps) => {
                                 placeholder="Type a message"
                                 variant="outlined"
                                 id="newMessage"
+                                sx={{
+                                    "& .MuiInputBase-input": { color: "#000" },
+                                    "& .MuiInputBase-input::placeholder": { color: "#000", opacity: 1 },
+                                }}
                                 onKeyDown={async (e) => {
                                     if (e.key === "Enter") {
                                         await postMessage()

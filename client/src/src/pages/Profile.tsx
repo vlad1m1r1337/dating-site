@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Chip, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material"
+import { Badge, Box, Button, Card, Chip, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material"
 import { UpdateForm } from "./models/UpdateForm"
 import { useEffect, useRef, useState } from "react"
 import _ from "lodash"
@@ -22,22 +22,21 @@ interface ProfilePageProps {
 }
 
 const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
-    const [formBackup, setFormBackup] = useState<UpdateForm>({
-        firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
-    })
     const [form, setForm] = useState<UpdateForm>({
         firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
     })
     const emailError = !form.email.length || (validator.isEmail(form.email) ? false : true)
     const firstnameError = !form.firstName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.firstName)
     const lastnameError = !form.lastName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.lastName)
+    const tagsError = !Object.entries(form.tags).filter(([, value]) => value).length
+    const imagesError = !form.images.length
     const geolocError = !form.geoloc.length || form.geoloc.split(',').length !== 2 || form.geoloc === "0,0"
-    const tagsError = !!!Object.entries(form.tags).filter(([key, value]) => value).length
 
     const [isPageLoading, setIsPageLoading] = useState(true)
     const [imgAreLoading, setImgAreLoading] = useState<number[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isMapOpened, setIsMapOpened] = useState(false)
+    const [showRequiredErrors, setShowRequiredErrors] = useState(false)
 
     const [currentPosition, setCurrentPosition] = useState<LatLngExpression>({ lat: 0, lng: 0 })
 
@@ -60,6 +59,16 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     const handleDeleteImg = (index: number) => {
         const images = _.cloneDeep(form.images)
         images.splice(index, 1)
+        setForm(prev => ({ ...prev, images }))
+    }
+
+    const handleDragImg = (dragIndex: number, dropIndex: number) => {
+        if (Number.isNaN(dragIndex) || dragIndex < 0 || dragIndex >= form.images.length || dragIndex === dropIndex || isSubmitting || imgAreLoading.includes(dragIndex) || imgAreLoading.includes(dropIndex)) {
+            return
+        }
+        const images = _.cloneDeep(form.images)
+        const [draggedImage] = images.splice(dragIndex, 1)
+        images.splice(dropIndex, 0, draggedImage)
         setForm(prev => ({ ...prev, images }))
     }
 
@@ -89,9 +98,13 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
             for (let i = 0; i < res.data.images.length; i++) {
                 imgLoadingArray.push(i)
             }
-            const { id, username, completion, ...filteredData } = res.data
+            const filteredData = _.omit(res.data, [
+                "id",
+                "username",
+                "completion",
+                "last_login",
+            ]) as UpdateForm
             filteredData.images = filteredData.images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img)
-            setFormBackup(filteredData)
             setForm(filteredData)
             const parsedGeoloc = filteredData.geoloc.split(',')
             if (parsedGeoloc.length === 2) {
@@ -120,14 +133,22 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     }
 
     const handleSubmit = async () => {
+        setShowRequiredErrors(true)
+        if (imagesError || geolocError) {
+            const missingFields = [
+                imagesError ? "at least one photo" : null,
+                geolocError ? "your location" : null,
+            ].filter(Boolean).join(" and ")
+            setErrorAlert(`Please add ${missingFields}`)
+            return
+        }
         setIsSubmitting(true)
-        const { elo, ...formToSend } = _.cloneDeep(form)
+        const formToSend = _.omit(_.cloneDeep(form), ["elo"])
         if (!formToSend.bio) {
             formToSend.bio = " "
         }
         formToSend.images = formToSend.images.map((img) => img.split("/image/")[1])
         await instance.put('/user', formToSend).then(() => {
-            setFormBackup(form)
             setSuccessAlert("Profile updated")
             getUser()
         }).catch((err) => {
@@ -210,16 +231,33 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
 
 
     return (
-        <Box className="profilePage" sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", p: 2 }}>
+        <Box className="profilePage" sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", height: "100%", minHeight: 0, overflowY: "auto", p: 2 }}>
             {isPageLoading ? <CircularProgress color="secondary" className="mt-4" /> :
                 <Card sx={{ width: "100%", maxWidth: 560, p: 2 }} elevation={6} style={{ boxShadow: "8px 8px 10px #000000" }}>
                         <Typography variant="h6" fontWeight="bold" textAlign="center" mb={1}>PROFILE</Typography>
                         <Grid container spacing={2}>
                                 {form.images.map((image, index) => {
                                     return (
-                                        <Grid item xs={6} sm={4} className="mt-3 imgMosaicContainer" key={index}>
+                                        <Grid
+                                            item
+                                            xs={6}
+                                            sm={4}
+                                            className="mt-3 imgMosaicContainer draggableImgMosaicContainer"
+                                            key={image}
+                                            draggable={!isSubmitting && !imgAreLoading.includes(index)}
+                                            onDragStart={(event) => event.dataTransfer.setData("text/plain", index.toString())}
+                                            onDragOver={(event) => event.preventDefault()}
+                                            onDrop={(event) => {
+                                                event.preventDefault()
+                                                handleDragImg(Number(event.dataTransfer.getData("text/plain")), index)
+                                            }}
+                                        >
                                             {imgAreLoading.includes(index) && <CircularProgress color="secondary" />}
-                                            <Badge color="error" badgeContent={<p className="badgeCross">x</p>} role="button" className="cursor-pointer" style={{ display: isSubmitting || imgAreLoading.includes(index) ? "none" : "block" }} onClick={() => handleDeleteImg(index)}>
+                                            <Badge
+                                                color="error"
+                                                badgeContent={<p className="badgeCross" role="button" style={{ cursor: "pointer" }} onClick={(event) => { event.stopPropagation(); handleDeleteImg(index) }}>x</p>}
+                                                style={{ display: isSubmitting || imgAreLoading.includes(index) ? "none" : "block" }}
+                                            >
                                                 <img src={image} alt="profile" className="imgMosaic" onError={(e) => { e.currentTarget.src = goose }} onLoad={() => { setImgAreLoading(prev => prev.filter((value) => value !== index)) }} loading="lazy" />
                                             </Badge>
                                         </Grid>
@@ -230,7 +268,11 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                         <img src={addImage} alt="Click to upload" className="imgMosaic" onClick={() => document.getElementById("imgInput")?.click()} />
                                         <input multiple id="imgInput" type="file" accept=".jpg, .jpeg, .png" onChange={(event) => onChangeImg(event.target.files)} style={{ display: "none" }} disabled={isSubmitting} />
                                     </Grid>}
-                            </Grid>
+                        </Grid>
+                        {showRequiredErrors && imagesError &&
+                            <Typography color="error" variant="caption" display="block" mt={1}>
+                                Please add at least one photo
+                            </Typography>}
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                                 <Box sx={{ flex: 5 }}>
@@ -345,6 +387,10 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                 >
                                     {isMapOpened ? "Close map" : "Open map"}
                                 </Button>
+                                {showRequiredErrors && geolocError &&
+                                    <Typography color="error" variant="caption" display="block" mt={1}>
+                                        Please set your location
+                                    </Typography>}
                             </Box>
                         <Divider sx={{ my: 2 }}><Typography fontWeight="bold">INFORMATIONS</Typography></Divider>
                         <Box sx={{ mt: 2 }}>
@@ -414,7 +460,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                             <LoadingButton
                                 variant="contained"
                                 color="primary"
-                                disabled={_.isEqual(form, formBackup) || emailError || firstnameError || tagsError || lastnameError || geolocError || form.images.length < 1}
+                                disabled={emailError || firstnameError || tagsError || lastnameError}
                                 loading={isSubmitting}
                                 size="medium"
                                 style={{ width: "fit-content" }}
@@ -423,7 +469,8 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                 Save
                             </LoadingButton>
                         </Box>
-                    </Card>}
+                    </Card>
+            }
         </Box>
     )
 }

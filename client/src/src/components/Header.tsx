@@ -6,11 +6,12 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import instance from '../api/Instance';
 import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti'
+import { StatusListModel } from '../pages/models/StatusListModel';
 
 interface HeaderProps {
     setErrorAlert: (error: string) => void
     setSuccessAlert: (success: string) => void
-    setStatusList: (statusList: any) => void
+    setStatusList: (statusList: StatusListModel) => void
 }
 
 const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) => {

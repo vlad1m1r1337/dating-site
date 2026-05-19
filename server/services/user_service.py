@@ -24,21 +24,30 @@ import string
 def strip_user(user):
     if not user:
         return None
+    tags = user["tags"] if isinstance(user["tags"], dict) else json.loads(user["tags"])
+    raw_geoloc = user["geoloc"]
+    if isinstance(raw_geoloc, str):
+        geoloc = raw_geoloc
+    elif isinstance(raw_geoloc, (list, tuple)) and len(raw_geoloc) == 2:
+        geoloc = f"{raw_geoloc[0]},{raw_geoloc[1]}"
+    else:
+        geoloc = "0,0"
     return {
-        "id": user["id"],
+        "id": str(user["id"]),
         "email": user["email"],
         "username": user["username"],
         "firstName": user["first_name"],
         "lastName": user["last_name"],
-        "images": user["images"] if user["images"] else [],
+        "images": [str(i) for i in user["images"]] if user["images"] else [],
         "completion": user["completion"],
         "gender": user["gender"],
         "orientation": user["orientation"],
-        "tags": json.loads(user["tags"]),
+        "tags": tags,
         "bio": user["bio"] if user["bio"] else "",
-        "geoloc": user["geoloc"],
+        "geoloc": geoloc,
         "age": user["age"],
-        "elo": user["elo"]
+        "elo": user["elo"],
+        "last_login": int(user["last_activity"]) if user["last_activity"] else 0,
     }
 
 
@@ -173,12 +182,12 @@ async def create_user(db, body: dict):
         )
         subject = "Welcome to Adopt A Goose"
         content = (
-            "Welcome to Adopt A Goose, please click on the following link to validate your email address: "
-            + str(URL_FRONT)
-            + "validate-email/"
-            + token_id
+            f"Welcome to Adopt A Goose, please click on the following link "
+            f"to validate your email address: "
+            f"{URL_FRONT}/validate-email/{token_id}"
         )
-        await send_email(body["email"], subject, content)
+        result = await send_email(body["email"], subject, content)
+        print(f"Email send result: {result}")
         return account_created()
 
     except Exception as e:

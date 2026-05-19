@@ -74,7 +74,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 helperText={firstnameError ? 'Firstname must be between 3 and 16 characters long and contain only letters' : ''}
                                 variant="outlined"
                                 color="primary"
-                                inputProps={{ style: { color: 'black' }, maxLength: 16 }}
+                                inputProps={{ style: { color: 'white' }, maxLength: 16 }}
                             />
                         </div>
                     </div>
@@ -92,7 +92,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 helperText={lastnameError ? 'Last name must be between 3 and 16 characters long and contain only letters' : ''}
                                 variant="outlined"
                                 color="primary"
-                                inputProps={{ style: { color: 'black' }, maxLength: 16 }}
+                                inputProps={{ style: { color: 'white' }, maxLength: 16 }}
                             />
                         </div>
                     </div>
@@ -110,7 +110,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 helperText={usernameError ? 'Username must be between 3 and 16 characters long and contain only letters and numbers' : ''}
                                 variant="outlined"
                                 color="primary"
-                                inputProps={{ style: { color: 'black' }, maxLength: 16 }}
+                                inputProps={{ style: { color: 'white' }, maxLength: 16 }}
                             />
                         </div>
                     </div>
@@ -128,7 +128,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 helperText={emailError ? 'Invalid email' : ''}
                                 variant="outlined"
                                 color="primary"
-                                inputProps={{ style: { color: 'black' }, maxLength: 320 }}
+                                inputProps={{ style: { color: 'white' }, maxLength: 320 }}
                             />
                         </div>
                     </div>
@@ -153,7 +153,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                         handleSubmit()
                                     }
                                 }}
-                                inputProps={{ style: { color: 'black' }, maxLength: 30 }}
+                                inputProps={{ style: { color: 'white' }, maxLength: 30 }}
                             />
                         </div>
                     </div>

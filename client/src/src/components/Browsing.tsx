@@ -153,6 +153,14 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
         })
     }
 
+    const previousProfile = () => {
+        setProfileIndex(prev => prev === 0 ? profiles.length - 1 : prev - 1)
+    }
+
+    const nextProfile = () => {
+        setProfileIndex(prev => (prev + 1) % profiles.length)
+    }
+
     useEffect(() => {
         getProfiles()
     }, [])
@@ -304,6 +312,8 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
                             unlikeProfile={unlikeProfile}
                             statusList={statusList}
                             isHandlingInteraction={isHandlingInteraction}
+                            previousProfile={previousProfile}
+                            nextProfile={nextProfile}
                         />
                         :
                         <div className="skeletonHeight">

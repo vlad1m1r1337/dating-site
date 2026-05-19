@@ -22,7 +22,7 @@ async def get_chat_rooms(db, user, limit: int = 50, offset: int = 0):
         str(u["id"]): {
             "id": str(u["id"]),
             "firstName": u["first_name"],
-            "image": u["images"][0] if u["images"] else None,
+            "image": str(u["images"][0]) if u["images"] else None,
         }
         for u in users_rows
     }
