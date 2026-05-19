@@ -63,6 +63,16 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
         setForm(prev => ({ ...prev, images }))
     }
 
+    const handleDragImg = (dragIndex: number, dropIndex: number) => {
+        if (Number.isNaN(dragIndex) || dragIndex < 0 || dragIndex >= form.images.length || dragIndex === dropIndex || isSubmitting || imgAreLoading.includes(dragIndex) || imgAreLoading.includes(dropIndex)) {
+            return
+        }
+        const images = _.cloneDeep(form.images)
+        const [draggedImage] = images.splice(dragIndex, 1)
+        images.splice(dropIndex, 0, draggedImage)
+        setForm(prev => ({ ...prev, images }))
+    }
+
     const handleTagChange = (key: string, value: boolean) => {
         const tags = _.cloneDeep(form.tags)
         if (Object.keys(tags).includes(key)) {
@@ -222,9 +232,26 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                         <Grid container spacing={2}>
                                 {form.images.map((image, index) => {
                                     return (
-                                        <Grid item xs={6} sm={4} className="mt-3 imgMosaicContainer" key={index}>
+                                        <Grid
+                                            item
+                                            xs={6}
+                                            sm={4}
+                                            className="mt-3 imgMosaicContainer draggableImgMosaicContainer"
+                                            key={image}
+                                            draggable={!isSubmitting && !imgAreLoading.includes(index)}
+                                            onDragStart={(event) => event.dataTransfer.setData("text/plain", index.toString())}
+                                            onDragOver={(event) => event.preventDefault()}
+                                            onDrop={(event) => {
+                                                event.preventDefault()
+                                                handleDragImg(Number(event.dataTransfer.getData("text/plain")), index)
+                                            }}
+                                        >
                                             {imgAreLoading.includes(index) && <CircularProgress color="secondary" />}
-                                            <Badge color="error" badgeContent={<p className="badgeCross">x</p>} role="button" className="cursor-pointer" style={{ display: isSubmitting || imgAreLoading.includes(index) ? "none" : "block" }} onClick={() => handleDeleteImg(index)}>
+                                            <Badge
+                                                color="error"
+                                                badgeContent={<p className="badgeCross" role="button" style={{ cursor: "pointer" }} onClick={(event) => { event.stopPropagation(); handleDeleteImg(index) }}>x</p>}
+                                                style={{ display: isSubmitting || imgAreLoading.includes(index) ? "none" : "block" }}
+                                            >
                                                 <img src={image} alt="profile" className="imgMosaic" onError={(e) => { e.currentTarget.src = goose }} onLoad={() => { setImgAreLoading(prev => prev.filter((value) => value !== index)) }} loading="lazy" />
                                             </Badge>
                                         </Grid>
@@ -235,7 +262,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                         <img src={addImage} alt="Click to upload" className="imgMosaic" onClick={() => document.getElementById("imgInput")?.click()} />
                                         <input multiple id="imgInput" type="file" accept=".jpg, .jpeg, .png" onChange={(event) => onChangeImg(event.target.files)} style={{ display: "none" }} disabled={isSubmitting} />
                                     </Grid>}
-                            </Grid>
+                        </Grid>
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                                 <Box sx={{ flex: 5 }}>

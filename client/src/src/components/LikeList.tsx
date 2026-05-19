@@ -110,6 +110,18 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
         })
     }
 
+    const previousProfile = () => {
+        const currentIndex = likes.findIndex(like => like.id === profileId)
+        const nextIndex = currentIndex <= 0 ? likes.length - 1 : currentIndex - 1
+        setProfileId(likes[nextIndex]?.id || null)
+    }
+
+    const nextProfile = () => {
+        const currentIndex = likes.findIndex(like => like.id === profileId)
+        const nextIndex = currentIndex < 0 ? 0 : (currentIndex + 1) % likes.length
+        setProfileId(likes[nextIndex]?.id || null)
+    }
+
     useEffect(() => {
         getLikes()
     }, [refresh])
@@ -132,6 +144,8 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
                             unlikeProfile={unlikeProfile}
                             statusList={statusList}
                             isHandlingInteraction={isHandlingInteraction}
+                            previousProfile={previousProfile}
+                            nextProfile={nextProfile}
                         />
                     </>
                     :

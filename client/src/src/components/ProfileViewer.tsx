@@ -1,5 +1,5 @@
 import goose from '../../assets/goose.jpg'
-import { Profiler, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -32,9 +32,11 @@ interface ProfileViewerProps {
 	unlikeProfile?: (profileId: string) => Promise<void>
 	statusList: StatusListModel
 	isHandlingInteraction?: boolean
+	previousProfile?: () => void
+	nextProfile?: () => void
 }
 
-const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile, blockProfile, unblockProfile, unlikeProfile, statusList, isHandlingInteraction }: ProfileViewerProps) => {
+const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile, blockProfile, unblockProfile, unlikeProfile, statusList, isHandlingInteraction, previousProfile, nextProfile }: ProfileViewerProps) => {
 
 	const [imageIndex, setImageIndex] = useState(0)
 	const [isReportModalOpened, setIsReportModalOpened] = useState(false)
@@ -70,6 +72,22 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 		func().then(() => {
 			reset()
 		})
+	}
+
+	const handlePrevious = () => {
+		if (previousProfile) {
+			previousProfile()
+			return
+		}
+		setImageIndex((imageIndex - 1) < 0 ? profile?.images.length ? profile.images.length - 1 : 0 : imageIndex - 1)
+	}
+
+	const handleNext = () => {
+		if (nextProfile) {
+			nextProfile()
+			return
+		}
+		setImageIndex(profile?.images.length ? (imageIndex + 1) % profile.images.length : 0)
 	}
 
 	useEffect(() => {
@@ -145,11 +163,12 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 						{reportProfile &&
 							<Button className="reportButton" title="Report this profile" onClick={() => { setIsReportModalOpened(true) }}>
 								<ReportIcon fontSize="large" />
-							</Button>}
-						<Button className="beforePhotoButton" onClick={() => setImageIndex((imageIndex - 1) < 0 ? profile.images.length - 1 : imageIndex - 1)} title="Previous photo">
+							</Button>
+						}
+						<Button className="beforePhotoButton" onClick={handlePrevious} title={previousProfile ? "Previous profile" : "Previous photo"} disabled={isHandlingInteraction}>
 							<NavigateBeforeIcon className="me-2" fontSize="large" />
 						</Button>
-						<Button className="nextPhotoButton" onClick={() => setImageIndex((imageIndex + 1) % profile.images.length)} title="Next photo">
+						<Button className="nextPhotoButton" onClick={handleNext} title={nextProfile ? "Next profile" : "Next photo"} disabled={isHandlingInteraction}>
 							<NavigateNextIcon className="ms-2" fontSize="large" />
 						</Button>
 						{likeProfile && skipProfile && unblockProfile && unlikeProfile &&
@@ -215,7 +234,7 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 						</p>
 						<hr className="w-100 mt-2" />
 						<div className="col-12 overflow-y-scroll tagsContainer d-flex">
-							<Stack direction="row" spacing={1} className="flex-wrap">
+							<Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
 								{profile.tags && Object.entries(profile.tags).map(([key, value], index) => {
 									return value ?
 										profile.commonTags && profile.commonTags.includes(key) ?
