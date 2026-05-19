@@ -1,4 +1,4 @@
-import { Badge, Box, Button, Card, Chip, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, Stack, TextField, Typography } from "@mui/material"
+import { Badge, Box, Button, Card, Chip, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material"
 import { UpdateForm } from "./models/UpdateForm"
 import { useEffect, useRef, useState } from "react"
 import _ from "lodash"
@@ -22,22 +22,21 @@ interface ProfilePageProps {
 }
 
 const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
-    const [formBackup, setFormBackup] = useState<UpdateForm>({
-        firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
-    })
     const [form, setForm] = useState<UpdateForm>({
         firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
     })
     const emailError = !form.email.length || (validator.isEmail(form.email) ? false : true)
     const firstnameError = !form.firstName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.firstName)
     const lastnameError = !form.lastName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.lastName)
+    const tagsError = !Object.entries(form.tags).filter(([, value]) => value).length
+    const imagesError = !form.images.length
     const geolocError = !form.geoloc.length || form.geoloc.split(',').length !== 2 || form.geoloc === "0,0"
-    const tagsError = !Object.entries(form.tags).filter(([key, value]) => value).length
 
     const [isPageLoading, setIsPageLoading] = useState(true)
     const [imgAreLoading, setImgAreLoading] = useState<number[]>([])
     const [isSubmitting, setIsSubmitting] = useState(false)
     const [isMapOpened, setIsMapOpened] = useState(false)
+    const [showRequiredErrors, setShowRequiredErrors] = useState(false)
 
     const [currentPosition, setCurrentPosition] = useState<LatLngExpression>({ lat: 0, lng: 0 })
 
@@ -106,7 +105,6 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 "last_login",
             ]) as UpdateForm
             filteredData.images = filteredData.images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img)
-            setFormBackup(filteredData)
             setForm(filteredData)
             const parsedGeoloc = filteredData.geoloc.split(',')
             if (parsedGeoloc.length === 2) {
@@ -135,14 +133,22 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     }
 
     const handleSubmit = async () => {
+        setShowRequiredErrors(true)
+        if (imagesError || geolocError) {
+            const missingFields = [
+                imagesError ? "at least one photo" : null,
+                geolocError ? "your location" : null,
+            ].filter(Boolean).join(" and ")
+            setErrorAlert(`Please add ${missingFields}`)
+            return
+        }
         setIsSubmitting(true)
-        const { elo, ...formToSend } = _.cloneDeep(form)
+        const formToSend = _.omit(_.cloneDeep(form), ["elo"])
         if (!formToSend.bio) {
             formToSend.bio = " "
         }
         formToSend.images = formToSend.images.map((img) => img.split("/image/")[1])
         await instance.put('/user', formToSend).then(() => {
-            setFormBackup(form)
             setSuccessAlert("Profile updated")
             getUser()
         }).catch((err) => {
@@ -263,6 +269,10 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                         <input multiple id="imgInput" type="file" accept=".jpg, .jpeg, .png" onChange={(event) => onChangeImg(event.target.files)} style={{ display: "none" }} disabled={isSubmitting} />
                                     </Grid>}
                         </Grid>
+                        {showRequiredErrors && imagesError &&
+                            <Typography color="error" variant="caption" display="block" mt={1}>
+                                Please add at least one photo
+                            </Typography>}
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
                                 <Box sx={{ flex: 5 }}>
@@ -377,6 +387,10 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                 >
                                     {isMapOpened ? "Close map" : "Open map"}
                                 </Button>
+                                {showRequiredErrors && geolocError &&
+                                    <Typography color="error" variant="caption" display="block" mt={1}>
+                                        Please set your location
+                                    </Typography>}
                             </Box>
                         <Divider sx={{ my: 2 }}><Typography fontWeight="bold">INFORMATIONS</Typography></Divider>
                         <Box sx={{ mt: 2 }}>
@@ -446,7 +460,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                             <LoadingButton
                                 variant="contained"
                                 color="primary"
-                                disabled={emailError || firstnameError || tagsError || lastnameError || geolocError || form.images.length < 1}
+                                disabled={emailError || firstnameError || tagsError || lastnameError}
                                 loading={isSubmitting}
                                 size="medium"
                                 style={{ width: "fit-content" }}

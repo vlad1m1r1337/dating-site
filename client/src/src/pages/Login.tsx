@@ -59,7 +59,7 @@ const LoginPage = ({ setErrorAlert }: LoginPageProps) => {
                     label="Username"
                     variant="outlined"
                     sx={{ mb: 2 }}
-                    inputProps={{ maxLength: 16 }}
+                    inputProps={{ maxLength: 160 }}
                 />
                 <TextField
                     value={form.password}
