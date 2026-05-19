@@ -225,7 +225,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
 
 
     return (
-        <Box className="profilePage" sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", minHeight: "100vh", p: 2 }}>
+        <Box className="profilePage" sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", height: "100%", minHeight: 0, overflowY: "auto", p: 2 }}>
             {isPageLoading ? <CircularProgress color="secondary" className="mt-4" /> :
                 <Card sx={{ width: "100%", maxWidth: 560, p: 2 }} elevation={6} style={{ boxShadow: "8px 8px 10px #000000" }}>
                         <Typography variant="h6" fontWeight="bold" textAlign="center" mb={1}>PROFILE</Typography>
@@ -455,7 +455,8 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                 Save
                             </LoadingButton>
                         </Box>
-                    </Card>}
+                    </Card>
+            }
         </Box>
     )
 }
