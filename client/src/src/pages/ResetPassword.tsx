@@ -91,7 +91,8 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                                 handleReset()
                                             }
                                         }}
-                                        inputProps={{ style: { color: 'black' }, maxLength: 30 }}
+                                        sx={{ "& .MuiInputBase-input": { color: "#000" } }}
+                                        inputProps={{ maxLength: 30 }}
                                     />
                                 </div>
                             </div>
@@ -127,7 +128,8 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                         helperText={emailError ? 'Invalid email' : ''}
                                         variant="outlined"
                                         color="primary"
-                                        inputProps={{ style: { color: 'black' }, maxLength: 320 }}
+                                        sx={{ "& .MuiInputBase-input": { color: "#000" } }}
+                                        inputProps={{ maxLength: 320 }}
                                     />
                                 </div>
                             </div>

@@ -267,7 +267,7 @@ async def ask_reset_password(db, user):
         content = (
             "You asked for a password reset, please click on the following link to reset your password: "
             + str(URL_FRONT)
-            + "reset-password/"
+            + "/reset-password/"
             + token_id
         )
         await send_email(email, subject, content)
