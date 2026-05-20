@@ -180,9 +180,9 @@ async def create_user(db, body: dict):
             user_id,
             "email_validation",
         )
-        subject = "Welcome to Adopt A Goose"
+        subject = "Welcome to find your best one"
         content = (
-            f"Welcome to Adopt A Goose, please click on the following link "
+            f"Welcome to Find your best one, please click on the following link "
             f"to validate your email address: "
             f"{URL_FRONT}/validate-email/{token_id}"
         )
