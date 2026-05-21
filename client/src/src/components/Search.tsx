@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Chip, CircularProgress, Grid, Modal, Slider, Stack, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
@@ -51,7 +51,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
         })
     }
 
-    const getProfiles = async () => {
+    const getProfiles = useCallback(async () => {
         checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
         setProfiles([])
         setAreProfilesLoading(true)
@@ -62,17 +62,15 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
         catch (err) {
             localStorage.setItem("filterParams", JSON.stringify(defaultFilterParams))
         }
-        await instance.post('/profiles/queries',
-            {
-                min_age: filterParams.minAge,
-                max_age: filterParams.maxAge,
-                min_elo: filterParams.minElo,
-                max_elo: filterParams.maxElo,
-                distance: filterParams.distance,
-                min_tags: filterParams.minTags,
-                wanted_tags: wantedTags,
-            }
-        ).then((res) => {
+        await instance.post('/profiles/queries', {
+            min_age: filterParams.minAge,
+            max_age: filterParams.maxAge,
+            min_elo: filterParams.minElo,
+            max_elo: filterParams.maxElo,
+            distance: filterParams.distance,
+            min_tags: filterParams.minTags,
+            wanted_tags: wantedTags,
+        }).then((res) => {
             preloadImages(res.data.profiles.map((profile: ProfilesModel) => profile.image))
             setProfiles(res.data.profiles)
         }).catch((err) => {
@@ -86,7 +84,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
             setProfileId(null)
             setAreProfilesLoading(false)
         })
-    }
+    }, [wantedTags, setErrorAlert])
 
     const likeProfile = async (profileId: string) => {
         setIsHandlingInteraction(true)
@@ -153,7 +151,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
     useEffect(() => {
         getProfiles()
         getTags()
-    }, [])
+    }, [getProfiles])
 
     return (
         <div className="searchParent w-100 h-100">

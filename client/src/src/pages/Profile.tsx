@@ -1,6 +1,6 @@
 import { Badge, Box, Button, Card, Chip, CircularProgress, Divider, FormControl, Grid, InputLabel, MenuItem, Select, SelectChangeEvent, TextField, Typography } from "@mui/material"
 import { UpdateForm } from "./models/UpdateForm"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import _ from "lodash"
 import validator from "validator"
 import addImage from "../../assets/add-image2.png"
@@ -92,7 +92,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
         setForm(prev => ({ ...prev, geoloc: `${position.coords.latitude},${position.coords.longitude}` }))
     }
 
-    const getUser = async () => {
+    const getUser = useCallback(async () => {
         await instance.get<UserModel>('/user').then((res) => {
             const imgLoadingArray = []
             for (let i = 0; i < res.data.images.length; i++) {
@@ -116,7 +116,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
             localStorage.removeItem("token")
             navigate('/login')
         })
-    }
+    }, [navigate])
 
     const handleImgUpload = async (file: File) => {
         const formData = new FormData()
@@ -227,7 +227,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
         else {
             navigate('/login')
         }
-    }, [navigate])
+    }, [getUser, navigate])
 
 
     return (

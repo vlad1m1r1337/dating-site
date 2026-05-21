@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import instance from "../api/Instance"
 import { Avatar, Badge, BadgeProps, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Typography, styled } from "@mui/material"
 import { ChatMessage, ChatModel, ChatRoom } from "./models/ChatModel"
@@ -19,12 +19,12 @@ const Chat = ({ statusList }: ChatProps) => {
     const [data, setData] = useState<ChatModel>()
     const [roomSelected, setRoomSelected] = useState<ChatRoom>()
     const [images, setImages] = useState<HTMLImageElement[]>([])
-    const scrollToBottom = () => {
+    const scrollToBottom = useCallback(() => {
         if (roomSelected) {
             const chatBox = document.getElementById("chatZone")
             chatBox?.scrollTo(0, chatBox.scrollHeight)
         }
-    }
+    }, [roomSelected])
     socketChat.onmessage = (event) => {
         let data: ChatMessage | null = null
         try {
@@ -56,14 +56,15 @@ const Chat = ({ statusList }: ChatProps) => {
         setImages(imgArray)
     }
 
-    const getChat = async () => {
+    const getChat = useCallback(async () => {
         await instance.get<ChatModel>('/chat').then((res) => {
             if (res.data.rooms.length)
                 preloadImages(res.data.rooms.map(room => room.user_2.image))
             setData(res.data)
         }).catch(() => {
         })
-    }
+    }, [])
+    
     const postMessage = async () => {
         if (!roomSelected) return
         const tempMessage = (document.getElementById("newMessage") as HTMLInputElement)?.value || "";
@@ -73,16 +74,43 @@ const Chat = ({ statusList }: ChatProps) => {
             (document.getElementById("newMessage") as HTMLInputElement).value = tempMessage
         })
     }
+
+    useEffect(() => {
+        socketChat.onmessage = (event) => {
+            let data: ChatMessage | null = null
+            try {
+                data = JSON.parse(event.data)
+            } catch (e) {
+                return
+            }
+            if (roomSelected && data && data.id === roomSelected.id) {
+                setRoomSelected((room) => {
+                    if (!room || !data) return room
+                    return {
+                        ...room,
+                        messages: [
+                            ...room.messages,
+                            {
+                                ...data,
+                                id: data.id,
+                            },
+                        ],
+                    }
+                })
+            }
+        }
+    }, [socketChat, roomSelected])
+
     useEffect(() => {
         getChat()
         return () => {
             socketChat.close()
         }
-    }, [])
+    }, [getChat, socketChat])
 
     useEffect(() => {
         scrollToBottom()
-    }, [roomSelected])
+    }, [scrollToBottom])
 
     const StyledBadge = styled(Badge)<BadgeProps>(() => ({
         '& .MuiBadge-badge': {

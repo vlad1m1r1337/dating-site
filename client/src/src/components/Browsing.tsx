@@ -1,6 +1,5 @@
 import { CircularProgress, Button,Card, Modal, Slider, Typography } from "@mui/material"
 import ProfileViewer from "../components/ProfileViewer";
-import { useEffect, useState } from "react"
 import instance from "../api/Instance"
 import CloseIcon from '@mui/icons-material/Close';
 import { ProfilesModel } from "../components/models/ProfilesModel";
@@ -10,6 +9,7 @@ import { defaultFilterParams } from "../utils/filtersUtils";
 import { checkFilterParams } from "../utils/filtersUtils";
 import SortProfilesComponent from "./sortProfiles";
 import { StatusListModel } from "../pages/models/StatusListModel";
+import { useCallback, useEffect, useState } from "react"
 
 interface BrowsingProps {
     setErrorAlert: (message: string) => void
@@ -117,7 +117,7 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
         })
     }
 
-    const getProfiles = async () => {
+    const getProfiles = useCallback(async () => {
         checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
         setProfiles([])
         setProfileIndex(0)
@@ -129,17 +129,15 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
         catch (err) {
             localStorage.setItem("filterParams", JSON.stringify(defaultFilterParams))
         }
-        await instance.post('/profiles/queries',
-            {
-                min_age: filterParams.minAge,
-                max_age: filterParams.maxAge,
-                min_elo: filterParams.minElo,
-                max_elo: filterParams.maxElo,
-                distance: filterParams.distance,
-                min_tags: filterParams.minTags,
-                wanted_tags: []
-            }
-        ).then((res) => {
+        await instance.post('/profiles/queries', {
+            min_age: filterParams.minAge,
+            max_age: filterParams.maxAge,
+            min_elo: filterParams.minElo,
+            max_elo: filterParams.maxElo,
+            distance: filterParams.distance,
+            min_tags: filterParams.minTags,
+            wanted_tags: []
+        }).then((res) => {
             setProfiles(res.data.profiles)
         }).catch((err) => {
             if (err.response?.data.message) {
@@ -151,7 +149,7 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
         }).finally(() => {
             setAreProfilesLoading(false)
         })
-    }
+    }, [setErrorAlert])
 
     const previousProfile = () => {
         setProfileIndex(prev => prev === 0 ? profiles.length - 1 : prev - 1)
@@ -162,8 +160,8 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
     }
 
     useEffect(() => {
-        getProfiles()
-    }, [])
+    getProfiles()
+    }, [getProfiles])
 
     return (
         <div className="BrowsingParent w-100 h-100">

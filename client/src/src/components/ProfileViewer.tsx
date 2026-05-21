@@ -1,5 +1,5 @@
 import goose from '../../assets/goose.jpg'
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import MaleIcon from '@mui/icons-material/Male';
 import FemaleIcon from '@mui/icons-material/Female';
 import StarBorderIcon from '@mui/icons-material/StarBorder';
@@ -44,19 +44,19 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 	const [profile, setProfile] = useState<ProfileModel | null>(null)
 	const [images, setImages] = useState<HTMLImageElement[]>([])
 
-	const getProfileWithId = async (id: string) => {
+	const getProfileWithId = useCallback(async (id: string) => {
 		await instance.get<ProfileModel>('/user/' + id).then((res) => {
 			preloadImages(res.data.images)
 			setProfile(res.data)
 		}).catch(() => {
 			setProfile(null)
 		})
-	}
+	}, [])
 
-	const reset = () => {
+	const reset = useCallback(() => {
 		setImageIndex(0)
 		getProfileWithId(profileToGetId)
-	}
+	}, [getProfileWithId, profileToGetId])
 
 	const preloadImages = (images: string[]) => {
 		const imgArray: HTMLImageElement[] = []
@@ -92,7 +92,7 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 
 	useEffect(() => {
 		reset()
-	}, [profileToGetId])
+	}, [profileToGetId, reset])
 
 
 	const eloToStars = (elo: number) => {

@@ -1,4 +1,4 @@
-import { UserModel } from "../../pages/models/UserModel";
+// import { UserModel } from "../../pages/models/UserModel";
 
 export interface ProfilesModel {
     id: string

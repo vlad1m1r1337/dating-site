@@ -7,11 +7,14 @@ import instance from '../api/Instance';
 import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti'
 import { StatusListModel } from '../pages/models/StatusListModel';
+import { Dispatch, SetStateAction } from "react";
+import { StatusListModel } from "../pages/models/StatusListModel";
 
 interface HeaderProps {
     setErrorAlert: (error: string) => void
     setSuccessAlert: (success: string) => void
-    setStatusList: (statusList: StatusListModel) => void
+    // setStatusList: (statusList: StatusListModel) => void
+    setStatusList: Dispatch<SetStateAction<StatusListModel>>
 }
 
 const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) => {
@@ -22,8 +25,12 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
     useEffect(() => {
         if (!localStorage.getItem("token")) return
 
-        const socketNotifications = new WebSocket(import.meta.env.VITE_WS_API + "/notifications?token=" + localStorage.getItem("token")!)
-        const socketStatus = new WebSocket(import.meta.env.VITE_WS_API + "/status?token=" + localStorage.getItem("token")!)
+        const socketNotifications = new WebSocket(
+            import.meta.env.VITE_WS_API + "/notifications?token=" + localStorage.getItem("token")!
+        )
+        const socketStatus = new WebSocket(
+            import.meta.env.VITE_WS_API + "/status?token=" + localStorage.getItem("token")!
+        )
 
         socketNotifications.onmessage = (event) => {
             const data = JSON.parse(event.data)
@@ -39,10 +46,10 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
         }
 
         return () => {
-            socketNotifications?.close()
-            socketStatus?.close()
+            socketNotifications.close()
+            socketStatus.close()
         }
-    }, [navigate])
+    }, [setStatusList, setSuccessAlert])
 
     const handleLogout = async () => {
         await instance.post('/user/logout').then(() => {

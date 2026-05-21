@@ -1,5 +1,5 @@
 import { Avatar, List, ListItem, ListItemAvatar, ListItemText, CircularProgress, Button, Typography } from "@mui/material"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import goose from '../../assets/goose.jpg'
 import instance from "../api/Instance"
 import { LikeModel } from "./models/LikeModel"
@@ -34,7 +34,7 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
         setImages(imgArray)
     }
 
-    const getLikes = async () => {
+    const getLikes = useCallback(async () => {
         setIsLoading(true)
         await instance.get<LikeModel[]>(likesOrViews === "likes" ? '/user/likes' : '/user/views').then((res) => {
             if (res.data.length)
@@ -46,7 +46,7 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
             setIsLoading(false)
             setProfileId(null)
         })
-    }
+    }, [likesOrViews])
 
     const likeProfile = async (profileId: string) => {
         setIsHandlingInteraction(true)
@@ -124,7 +124,7 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
 
     useEffect(() => {
         getLikes()
-    }, [refresh])
+    }, [refresh, getLikes])
 
     return (
         <div className="likeListParent w-100 h-100">

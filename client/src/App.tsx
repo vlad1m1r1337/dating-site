@@ -11,11 +11,16 @@ import SuccessAlert from "./src/components/SuccessAlert";
 import { useState } from "react";
 import ResetPasswordPage from "./src/pages/ResetPassword";
 import NotFound from "./src/pages/NotFound";
+import { StatusListModel } from "./src/pages/models/StatusListModel";
 
 function App() {
   const [errorAlert, setErrorAlert] = useState<string>("")
   const [successAlert, setSuccessAlert] = useState<string>("")
-  const [statusList, setStatusList] = useState<any>([])
+  // const [statusList, setStatusList] = useState<any>([])
+  const [statusList, setStatusList] = useState<StatusListModel>({
+    count: 0,
+    users: [],
+  });
 
   return (
     <div style={{ height: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
