@@ -34,9 +34,9 @@ body::-webkit-scrollbar { display: none; }
   display: flex;
   flex-direction: column;
   width: 100%;
-  margin-top: 0;
+  margin-top: 38px;
   overflow-y: scroll;
-  margin-bottom: 0;
+  margin-bottom: 56px;
 }
 
 .profileViewer .status {
@@ -140,7 +140,8 @@ body::-webkit-scrollbar { display: none; }
   display: flex;
   justify-content: center;
   align-items: center;
-  height: calc(100dvh - 112px);
+  height: 670px;
+  margin-bottom: 56px;
 }
 
 .filtersModal {
@@ -157,7 +158,8 @@ body::-webkit-scrollbar { display: none; }
   flex-wrap: wrap;
   align-content: start;
   overflow-y: scroll;
-  height: calc(100dvh - 148px);
+  height: 638px;
+  margin-bottom: 56px;
 }
 
 .chatList {
@@ -167,14 +169,16 @@ body::-webkit-scrollbar { display: none; }
   align-content: start;
   justify-content: center;
   overflow-y: scroll;
-  height: calc(100dvh - 112px);
+  height: 638px;
+  margin-bottom: 56px;
 }
 
 .chatBox {
   width: 100%;
   display: flex;
   overflow-y: scroll;
-  height: calc(100dvh - 112px);
+  height: 670px;
+  margin-bottom: 56px;
 }
 
 .imgMosaic {

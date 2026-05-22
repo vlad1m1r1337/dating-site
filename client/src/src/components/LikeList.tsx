@@ -178,8 +178,10 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
                                 </List>
                             </>
                             :
-                            <div className="skeletonHeight display-flex flex-column position-relative">
-                                <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">{likesOrViews === "likes" ? "LIKES" : "VIEWS"}</Typography>
+                            <div className="skeletonHeight display-flex flex-column">
+                                <Typography variant="h6" fontWeight="bold" sx={{ color: "white", mb: 1 }}>
+                                    {likesOrViews === "likes" ? "LIKES" : "VIEWS"}
+                                </Typography>
                                 <AvatarPlaceholder className="w-100" />
                             </div>
             }

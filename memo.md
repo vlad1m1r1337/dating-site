@@ -15,3 +15,9 @@ SELECT COUNT(*) FROM chat;
 ```
 docker compose build --build-arg ARG_VITE_URL_API=http://localhost:8765 --build-arg ARG_VITE_WS_API=ws://localhost:8765 matcha-client
 ```
+
+## перезапуск фронтэнда
+
+```
+docker compose build matcha-client && docker compose up -d matcha-client
+```
