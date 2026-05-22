@@ -1,4 +1,4 @@
-import { CircularProgress, Button,Card, Modal, Slider, Typography } from "@mui/material"
+import { CircularProgress, Button, Box, Card, Modal, Slider, Typography } from "@mui/material"
 import ProfileViewer from "../components/ProfileViewer";
 import instance from "../api/Instance"
 import CloseIcon from '@mui/icons-material/Close';
@@ -10,6 +10,9 @@ import { checkFilterParams } from "../utils/filtersUtils";
 import SortProfilesComponent from "./sortProfiles";
 import { StatusListModel } from "../pages/models/StatusListModel";
 import { useCallback, useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import SearchOffIcon from '@mui/icons-material/SearchOff'
 
 interface BrowsingProps {
     setErrorAlert: (message: string) => void
@@ -19,10 +22,12 @@ interface BrowsingProps {
 
 const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps) => {
 
+    const navigate = useNavigate()
     const [areProfilesLoading, setAreProfilesLoading] = useState(true)
     const [profileIndex, setProfileIndex] = useState(0)
     const [isHandlingInteraction, setIsHandlingInteraction] = useState(false)
     const [profiles, setProfiles] = useState<ProfilesModel[]>([])
+    const [profilesError, setProfilesError] = useState<string | null>(null)
     const [isFiltersModalOpened, setIsFiltersModalOpened] = useState(false)
     const [ageSliderValue, setAgeSliderValue] = useState<number[]>([18, 99])
     const [eloSliderValue, setEloSliderValue] = useState<number[]>([20, 1000])
@@ -121,6 +126,7 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
         checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
         setProfiles([])
         setProfileIndex(0)
+        setProfilesError(null)
         setAreProfilesLoading(true)
         let filterParams = defaultFilterParams
         try {
@@ -139,12 +145,16 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
             wanted_tags: []
         }).then((res) => {
             setProfiles(res.data.profiles)
+            setProfilesError(null)
         }).catch((err) => {
             if (err.response?.data.message) {
-                if (String(err.response?.data.message).includes('Missing key(s)'))
+                const msg = String(err.response?.data.message)
+                if (msg.includes('Missing key(s)'))
                     checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
+                else if (msg.toLowerCase().includes('incomplete') || msg.toLowerCase().includes('profile'))
+                    setProfilesError('incomplete_profile')
                 else
-                    setErrorAlert(err.response?.data.message)
+                    setErrorAlert(msg)
             }
         }).finally(() => {
             setAreProfilesLoading(false)
@@ -164,7 +174,7 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
     }, [getProfiles])
 
     return (
-        <div className="BrowsingParent w-100 h-100">
+        <div className="BrowsingParent w-100 h-100" style={{ display: 'flex', flexDirection: 'column' }}>
             <Modal
                 open={isFiltersModalOpened}
                 onClose={() => { setIsFiltersModalOpened(false); getProfiles() }}
@@ -291,32 +301,70 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
                     </Card>
                 </div>
             </Modal>
-            <SortProfilesComponent profiles={profiles} setProfiles={setProfiles} />
-            <Button className="filtersButton me-3 mt-3" onClick={() => { checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue); setIsFiltersModalOpened(true) }} title="Filters">
-                <TuneRoundedIcon color="primary" />
-            </Button>
+            {!profilesError && (
+                <Box className="browsingToolbar">
+                    <SortProfilesComponent profiles={profiles} setProfiles={setProfiles} />
+                    <Button style={{ minWidth: 0, padding: '4px' }} onClick={() => { checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue); setIsFiltersModalOpened(true) }} title="Filters">
+                        <TuneRoundedIcon color="primary" />
+                    </Button>
+                </Box>
+            )}
             {
                 areProfilesLoading ?
                     <div className="skeletonHeight">
                         <CircularProgress color="secondary" />
                     </div>
                     :
-                    profiles.length > 0 && profileIndex < profiles.length ?
-                        <ProfileViewer profileToGetId={profiles[profileIndex].id}
-                            likeProfile={likeProfile} skipProfile={skipProfile}
-                            reportProfile={reportProfile}
-                            blockProfile={blockProfile}
-                            unblockProfile={unblockProfile}
-                            unlikeProfile={unlikeProfile}
-                            statusList={statusList}
-                            isHandlingInteraction={isHandlingInteraction}
-                            previousProfile={previousProfile}
-                            nextProfile={nextProfile}
-                        />
+                    profilesError === 'incomplete_profile' ?
+                        <Box className="skeletonHeight" sx={{ flexDirection: 'column', textAlign: 'center', px: 3 }}>
+                            <AccountCircleIcon sx={{ width: 120, height: 120, color: 'grey.500', mb: 2 }} />
+                            <Typography variant="h5" fontWeight="bold" color="white">
+                                Complete your profile
+                            </Typography>
+                            <Typography color="text.secondary" sx={{ mt: 1, maxWidth: 320 }}>
+                                Add a photo, write a bio, and set your location to start discovering people
+                            </Typography>
+                            <Button
+                                variant="contained"
+                                color="secondary"
+                                size="large"
+                                sx={{ mt: 3, borderRadius: 3, px: 4 }}
+                                onClick={() => navigate('/profile')}
+                            >
+                                Set up profile
+                            </Button>
+                        </Box>
                         :
-                        <div className="skeletonHeight">
-                            <AvatarPlaceholder className="w-100" />
-                        </div>
+                        profiles.length > 0 && profileIndex < profiles.length ?
+                            <ProfileViewer profileToGetId={profiles[profileIndex].id}
+                                likeProfile={likeProfile} skipProfile={skipProfile}
+                                reportProfile={reportProfile}
+                                blockProfile={blockProfile}
+                                unblockProfile={unblockProfile}
+                                unlikeProfile={unlikeProfile}
+                                statusList={statusList}
+                                isHandlingInteraction={isHandlingInteraction}
+                                previousProfile={previousProfile}
+                                nextProfile={nextProfile}
+                            />
+                            :
+                            <Box className="skeletonHeight" sx={{ flexDirection: 'column', textAlign: 'center', px: 3 }}>
+                                <SearchOffIcon sx={{ width: 80, height: 80, color: 'grey.500', mb: 2 }} />
+                                <Typography variant="h6" color="white">
+                                    No matches found
+                                </Typography>
+                                <Typography color="text.secondary" sx={{ mt: 1 }}>
+                                    Try adjusting your filters
+                                </Typography>
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    sx={{ mt: 2 }}
+                                    onClick={() => { checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue); setIsFiltersModalOpened(true) }}
+                                >
+                                    Open filters
+                                </Button>
+                            </Box>
             }
         </div>
     )

@@ -8,7 +8,6 @@ import { useEffect, useState } from 'react';
 import Confetti from 'react-confetti'
 import { StatusListModel } from '../pages/models/StatusListModel';
 import { Dispatch, SetStateAction } from "react";
-import { StatusListModel } from "../pages/models/StatusListModel";
 
 interface HeaderProps {
     setErrorAlert: (error: string) => void

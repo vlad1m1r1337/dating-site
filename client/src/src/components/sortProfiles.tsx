@@ -117,7 +117,7 @@ const SortProfilesComponent = ({ profiles, setProfiles }: SortProfilesComponentP
                     </Card>
                 </div>
             </Modal>
-            <Button className="sortButton ms-3 mt-3" onClick={() => { setIsSortModalOpened(true) }} title="Sort">
+            <Button style={{ minWidth: 0, padding: '4px' }} onClick={() => { setIsSortModalOpened(true) }} title="Sort">
                 <SortRoundedIcon color="primary" />
             </Button>
         </>

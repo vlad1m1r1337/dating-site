@@ -49,11 +49,11 @@ const HomePage = ({ setErrorAlert, setSuccessAlert, statusList }: HomePageProps)
         <div className="homePage container">
             {isPageLoading ? <CircularProgress color="secondary" /> :
                 <div className="homePageContent">
-                    <Card className="col-xs-12 col-sm-12 col-md-10 col-lg-8 col-xl-6 col-xxl-5 pt-3 position-relative d-flex" elevation={6} style={{ height: "400px", minHeight: 0, maxHeight: "50svh", marginTop: "14px", boxShadow: "8px 8px 10px #000000", overflow: "scroll", flexDirection: "column" }}>
+                    <Card className="col-xs-12 col-sm-12 col-md-10 col-lg-8 col-xl-6 col-xxl-5 pt-3 position-relative d-flex" elevation={6} style={{ minHeight: 0, marginTop: "14px", boxShadow: "8px 8px 10px #000000", overflow: "hidden", flexDirection: "column", flex: 1 }}>
                         <div className="homePageCardContent">
                             <MenuContent menuValue={menuValue} setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} statusList={statusList} />
                         </div>
-                        <BottomNavigation sx={{ position: 'absolute', bottom: 0, left: 0, right: 0, display: "flex" }} value={menuValue} onChange={handleMenuChange} showLabels={false}>
+                        <BottomNavigation sx={{ position: 'sticky', bottom: 0, left: 0, right: 0, display: "flex", flexShrink: 0, zIndex: 10 }} value={menuValue} onChange={handleMenuChange} showLabels={false}>
                             <BottomNavigationAction
                                 value="discover"
                                 icon={<HomeIcon color={menuValue === 'discover' ? 'secondary' : 'primary'} />}

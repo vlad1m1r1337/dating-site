@@ -26,7 +26,7 @@ function App() {
     <div style={{ height: '100vh', background: '#0f0f0f', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       <Router>
         <Header setStatusList={setStatusList} setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />
-        <main style={{ flex: 1, minHeight: 0, overflow: 'hidden' }}>
+        <main style={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
           <Routes>
             <Route path="/" element={<HomePage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} statusList={statusList} />} />
             <Route path="/register" element={<RegisterPage setErrorAlert={setErrorAlert} setSuccessAlert={setSuccessAlert} />} />
