@@ -4,7 +4,6 @@ import instance from "../api/Instance"
 import CloseIcon from '@mui/icons-material/Close';
 import { ProfilesModel } from "../components/models/ProfilesModel";
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded';
-import AvatarPlaceholder from './AvatarPlaceholder'
 import { defaultFilterParams } from "../utils/filtersUtils";
 import { checkFilterParams } from "../utils/filtersUtils";
 import SortProfilesComponent from "./sortProfiles";
@@ -196,7 +195,7 @@ const Browsing = ({ setErrorAlert, setSuccessAlert, statusList }: BrowsingProps)
                                 max={99}
                                 style={{ width: "210px", margin: "24px" }}
                                 value={ageSliderValue}
-                                onChange={(event, newValue) => {
+                                onChange={(_event, newValue) => {
                                     if (localStorage.getItem("filterParams")) {
                                         const filterParams = JSON.parse(localStorage.getItem("filterParams") || "{}")
                                         if (typeof newValue === "number")

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Button, Card, Chip, CircularProgress, Grid, Modal, Slider, Stack, Typography } from '@mui/material'
 import CloseIcon from '@mui/icons-material/Close'
 import TuneRoundedIcon from '@mui/icons-material/TuneRounded'
@@ -176,7 +176,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
                                 max={99}
                                 style={{ minWidth: "190px", margin: "24px" }}
                                 value={ageSliderValue}
-                                onChange={(event, newValue) => {
+                                onChange={(_event, newValue) => {
                                     if (localStorage.getItem("filterParams")) {
                                         const filterParams = JSON.parse(localStorage.getItem("filterParams") || "{}")
                                         if (typeof newValue === "number")

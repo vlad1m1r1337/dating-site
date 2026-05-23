@@ -13,5 +13,5 @@ export interface UserModel {
     completion : number
     geoloc : string
     elo : number
-    last_login : number
+    last_login : number | null
 }
