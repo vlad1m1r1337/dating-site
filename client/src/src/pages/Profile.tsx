@@ -93,7 +93,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     }
 
     const getUser = useCallback(async () => {
-        await instance.get<UserModel>('/user').then((res) => {
+        await instance.get<UserModel>('/user').then(async (res) => {
             const imgLoadingArray = []
             for (let i = 0; i < res.data.images.length; i++) {
                 imgLoadingArray.push(i)
@@ -104,6 +104,26 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 "completion",
                 "last_login",
             ]) as UpdateForm
+            // Ensure we have the full list of available tags and merge user's selections
+            try {
+                const tagsRes = await instance.get('/tags')
+                const availableTags: string[] = tagsRes.data.tags || []
+                const mergedTags: { [key: string]: boolean } = {}
+                // initialize all available tags to false
+                for (const t of availableTags) {
+                    mergedTags[t] = false
+                }
+                // overlay user's tags if present
+                if (filteredData.tags && Object.keys(filteredData.tags).length > 0) {
+                    for (const [k, v] of Object.entries(filteredData.tags)) {
+                        if (k in mergedTags) mergedTags[k] = !!v
+                        else mergedTags[k] = !!v
+                    }
+                }
+                filteredData.tags = mergedTags
+            } catch (e) {
+                // if tags endpoint fails, keep whatever tags came from user
+            }
             filteredData.images = filteredData.images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img)
             setForm(filteredData)
             const parsedGeoloc = filteredData.geoloc.split(',')
@@ -112,9 +132,14 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 mapRef.current?.setView({ lat: parseFloat(parsedGeoloc[0]), lng: parseFloat(parsedGeoloc[1]) }, 13)
             }
             setIsPageLoading(false)
-        }).catch(() => {
-            localStorage.removeItem("token")
-            navigate('/login')
+        }).catch((err) => {
+            if (err?.response?.status === 401) {
+                localStorage.removeItem("token")
+                navigate('/login')
+                return
+            }
+            setErrorAlert(err?.response?.data?.message || 'Could not load your profile')
+            setIsPageLoading(false)
         })
     }, [navigate])
 
@@ -229,6 +254,18 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
         }
     }, [getUser, navigate])
 
+    useEffect(() => {
+        console.log('Profile validation state', {
+            emailError,
+            firstnameError,
+            lastnameError,
+            tagsError,
+            imagesError,
+            geolocError,
+            form
+        })
+    }, [emailError, firstnameError, lastnameError, tagsError, imagesError, geolocError, form])
+
 
     return (
         <Box className="profilePage" sx={{ display: "flex", justifyContent: "center", alignItems: "flex-start", height: "100%", minHeight: 0, overflowY: "auto", p: 2 }}>
@@ -341,6 +378,11 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                             <Chip key={index} label={key} variant="outlined" color="primary"  onClick={() => { handleTagChange(key, true) }} disabled={isSubmitting} />
                                     })}
                                 </Box>
+                        {showRequiredErrors && tagsError && (
+                            <Typography color="error" variant="caption" display="block" mt={1}>
+                                Please select at least one tag
+                            </Typography>
+                        )}
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ position: "relative", mt: 1 }}>
                                     <TextField
@@ -460,7 +502,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                             <LoadingButton
                                 variant="contained"
                                 color="primary"
-                                disabled={emailError || firstnameError || tagsError || lastnameError}
+                                disabled={isSubmitting || emailError || firstnameError || tagsError || lastnameError || imagesError || geolocError}
                                 loading={isSubmitting}
                                 size="medium"
                                 style={{ width: "fit-content" }}
@@ -468,6 +510,12 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                             >
                                 Save
                             </LoadingButton>
+                        </Box>
+                        <Box sx={{ mt: 2, p: 1, bgcolor: '#2b2b2b', borderRadius: 1 }}>
+                            <Typography variant="caption" color="warning.main" mb={1}>Debug (temporary): validation state</Typography>
+                            <Typography variant="caption" color="text.secondary" component="div" sx={{ whiteSpace: 'pre-wrap', fontSize: '0.75rem' }}>
+                                {JSON.stringify({ emailError, firstnameError, lastnameError, tagsError, imagesError, geolocError, imagesCount: form.images.length, tagsKeys: Object.keys(form.tags) }, null, 2)}
+                            </Typography>
                         </Box>
                     </Card>
             }

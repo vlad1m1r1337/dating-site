@@ -21,6 +21,16 @@ import random
 import secrets
 import string
 
+
+def normalize_image_ids(images):
+    normalized = []
+    for image in images or []:
+        try:
+            normalized.append(str(uuid.UUID(str(image))))
+        except Exception:
+            return None
+    return normalized
+
 def strip_user(user):
     if not user:
         return None
@@ -372,15 +382,14 @@ async def update_user(db, user, body):
             return check_first_name(body["firstName"])
         if check_last_name(body["lastName"]) is not None:
             return check_last_name(body["lastName"])
-        if body["images"] != user["images"]:
-            for image in body["images"]:
-                # if image not uuid
-                try:
-                    if not isinstance(image, uuid):
-                        return image_invalid()
-                except:
-                    pass
-            if len(body["images"]) > 5:
+        normalized_images = normalize_image_ids(body["images"])
+        if normalized_images is None:
+            return image_invalid()
+        current_images = normalize_image_ids(user["images"])
+        if current_images is None:
+            current_images = []
+        if normalized_images != current_images:
+            if len(normalized_images) > 5:
                 return too_many_images()
         if body["orientation"] != user["orientation"]:
             if (
@@ -446,7 +455,7 @@ async def update_user(db, user, body):
             body["gender"],
             body["bio"],
             json.dumps(body["tags"]),
-            body["images"],
+            normalized_images,
             body["geoloc"],
             user["id"],
         )
