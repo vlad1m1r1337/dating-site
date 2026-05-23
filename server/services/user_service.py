@@ -722,22 +722,40 @@ async def report(db, origin, recipient, body):
 
 async def get_views_by_user(db, user):
     try:
-        result = await db.fetch(
-            """SELECT * FROM interactions WHERE recipient = $1 AND type = 'view'""",
+        # Fetch views with a single join to avoid N queries for N views
+        rows = await db.fetch(
+            """
+            SELECT u.id, u.first_name, u.age, u.images
+            FROM interactions i
+            JOIN users u ON u.id = i.origin
+            WHERE i.recipient = $1 AND i.type = 'view'
+            """,
             user["id"],
         )
-        if not result:
+        if not rows:
             return []
         parsed = []
-        for view in result:
-            user = await search_user_by_id(db, view["origin"])
+        for r in rows:
+            images = r.get("images") if isinstance(r.get("images"), (list, tuple)) else r.get("images")
+            first_img = ""
+            try:
+                if images:
+                    # images may be stored as JSON/text; handle both
+                    if isinstance(images, str):
+                        import json
+
+                        imgs = json.loads(images)
+                        first_img = imgs[0] if imgs else ""
+                    else:
+                        first_img = images[0] if len(images) > 0 else ""
+            except Exception:
+                first_img = ""
             _user = {
-                'image': user["images"][0] if user["images"] else "",
-                'firstName': user["first_name"],
-                'age': user["age"],
-                'id': user["id"],
+                "image": first_img,
+                "firstName": r.get("first_name") or "",
+                "age": r.get("age") or "",
+                "id": r.get("id"),
             }
-            # check if not already in parsed
             if _user not in parsed:
                 parsed.append(_user)
         return parsed
@@ -746,20 +764,38 @@ async def get_views_by_user(db, user):
 
 async def get_likes_by_user(db, user):
     try:
-        result = await db.fetch(
-            """SELECT * FROM interactions WHERE recipient = $1 AND (type = 'like')""",
+        # Use single query with join to fetch liker users
+        rows = await db.fetch(
+            """
+            SELECT u.id, u.first_name, u.age, u.images
+            FROM interactions i
+            JOIN users u ON u.id = i.origin
+            WHERE i.recipient = $1 AND i.type = 'like'
+            """,
             user["id"],
         )
-        if not result:
+        if not rows:
             return []
         parsed = []
-        for view in result:
-            user = await search_user_by_id(db, view["origin"])
+        for r in rows:
+            images = r.get("images") if isinstance(r.get("images"), (list, tuple)) else r.get("images")
+            first_img = ""
+            try:
+                if images:
+                    if isinstance(images, str):
+                        import json
+
+                        imgs = json.loads(images)
+                        first_img = imgs[0] if imgs else ""
+                    else:
+                        first_img = images[0] if len(images) > 0 else ""
+            except Exception:
+                first_img = ""
             _user = {
-                'image': user["images"][0] if user["images"] else "",
-                'firstName': user["first_name"],
-                'age': user["age"],
-                'id': user["id"],
+                "image": first_img,
+                "firstName": r.get("first_name") or "",
+                "age": r.get("age") or "",
+                "id": r.get("id"),
             }
             if _user not in parsed:
                 parsed.append(_user)
