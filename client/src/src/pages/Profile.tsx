@@ -39,7 +39,8 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     const [isMapOpened, setIsMapOpened] = useState(false)
     const [showRequiredErrors, setShowRequiredErrors] = useState(false)
 
-    const [currentPosition, setCurrentPosition] = useState<LatLngExpression>({ lat: 0, lng: 0 })
+    // Default to Paris so new users don't start at 0,0 (in the ocean)
+    const [currentPosition, setCurrentPosition] = useState<LatLngExpression>({ lat: 48.8566, lng: 2.3522 })
 
     const mapRef = useRef<L.Map>(null);
 
@@ -126,7 +127,8 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 age: userData.age || 18,
                 tags: userTags,
                 images: images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img),
-                geoloc: userData.geoloc || '0,0',
+                // If user geoloc is missing or equals the placeholder '0,0', use Paris as default
+                geoloc: (userData.geoloc && userData.geoloc !== '0,0') ? userData.geoloc : '48.8566,2.3522',
                 elo: userData.elo || 0,
             }
 

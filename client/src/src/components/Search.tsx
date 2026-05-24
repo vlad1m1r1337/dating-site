@@ -253,7 +253,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
                                 }
                             />
                         </div>
-                        <div className="d-flex align-items-center justify-content-center w-100">
+                        <div className="d-flex align-items-center w-100">
                             <Typography id="min-tags-slider" style={{ marginLeft: "24px", marginRight: "24px" }}>
                                 Minimum common tags
                             </Typography>
@@ -261,7 +261,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
                                 getAriaLabel={() => 'Minimum common tags'}
                                 min={0}
                                 max={20}
-                                style={{ minWidth: "190px", margin: "24px" }}
+                                style={{ width: "190px", margin: "24px" }}
                                 valueLabelDisplay="on"
                                 aria-labelledby="min-tags-slider"
                                 value={minTagsSliderValue}
