@@ -112,9 +112,15 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 mapRef.current?.setView({ lat: parseFloat(parsedGeoloc[0]), lng: parseFloat(parsedGeoloc[1]) }, 13)
             }
             setIsPageLoading(false)
-        }).catch(() => {
-            localStorage.removeItem("token")
-            navigate('/login')
+        }).catch((error) => {
+            if (error?.response?.status === 401 || error?.response?.status === 403) {
+                localStorage.removeItem("token")
+                navigate('/login')
+                return
+            }
+
+            setErrorAlert(error?.response?.data?.message || 'Could not load profile')
+            setIsPageLoading(false)
         })
     }
 
