@@ -46,7 +46,7 @@ def strip_user(user):
         "bio": user["bio"] if user["bio"] else "",
         "geoloc": geoloc,
         "age": user["age"],
-        "elo": user["elo"],
+        "elo": int(user["elo"] if user["elo"] is not None else 0),
         "last_login": int(user["last_activity"]) if user["last_activity"] else 0,
     }
 

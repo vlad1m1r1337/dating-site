@@ -23,8 +23,9 @@ interface ProfilePageProps {
 
 const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     const [form, setForm] = useState<UpdateForm>({
-        firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
+        username: '', firstName: '', lastName: '', email: '', gender: '', orientation: '', bio: '', age: 18, tags: {}, images: [], geoloc: '', elo: 0
     })
+    const [availableTags, setAvailableTags] = useState<string[]>([])
     const emailError = !form.email.length || (validator.isEmail(form.email) ? false : true)
     const firstnameError = !form.firstName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.firstName)
     const lastnameError = !form.lastName.length || !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.lastName)
@@ -56,10 +57,20 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
         setForm(prev => ({ ...prev, [event.target.name]: parseInt(event.target.value) }))
     }
 
-    const handleDeleteImg = (index: number) => {
-        const images = _.cloneDeep(form.images)
-        images.splice(index, 1)
-        setForm(prev => ({ ...prev, images }))
+    const handleDeleteImg = async (index: number) => {
+        const image = form.images[index]
+        const imageId = image.split("/image/")[1]
+        if (!imageId) {
+            return
+        }
+
+        await instance.delete(`/image/${imageId}`).then(() => {
+            const images = _.cloneDeep(form.images)
+            images.splice(index, 1)
+            setForm(prev => ({ ...prev, images }))
+        }).catch((error) => {
+            setErrorAlert(error?.response?.data?.message || "Could not delete image")
+        })
     }
 
     const handleDragImg = (dragIndex: number, dropIndex: number) => {
@@ -93,26 +104,42 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     }
 
     const getUser = async () => {
-        await instance.get<UserModel>('/user').then((res) => {
-            const imgLoadingArray = []
-            for (let i = 0; i < res.data.images.length; i++) {
-                imgLoadingArray.push(i)
+        try {
+            const tagsResponse = await instance.get<{ tags: string[] }>('/tags')
+            const tagKeys = tagsResponse.data.tags || []
+            setAvailableTags(tagKeys)
+
+            const res = await instance.get<UserModel>('/user')
+            const responseData = res.data as any
+            const userData = (responseData.user || responseData.data || responseData) as UserModel & { first_name?: string; last_name?: string; last_activity?: number }
+            const userTags = Object.fromEntries(tagKeys.map((tag) => [tag, Boolean(userData.tags?.[tag])])) as Record<string, boolean>
+            const images = Array.isArray(userData.images) ? userData.images : []
+
+            const nextForm: UpdateForm = {
+                username: userData.username || '',
+                firstName: userData.firstName || userData.first_name || '',
+                lastName: userData.lastName || userData.last_name || '',
+                email: userData.email || '',
+                gender: userData.gender || '',
+                orientation: userData.orientation || '',
+                bio: userData.bio || '',
+                age: userData.age || 18,
+                tags: userTags,
+                images: images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img),
+                geoloc: userData.geoloc || '0,0',
+                elo: userData.elo || 0,
             }
-            const filteredData = _.omit(res.data, [
-                "id",
-                "username",
-                "completion",
-                "last_login",
-            ]) as UpdateForm
-            filteredData.images = filteredData.images.map((img) => import.meta.env.VITE_URL_API + "/image/" + img)
-            setForm(filteredData)
-            const parsedGeoloc = filteredData.geoloc.split(',')
+
+            setForm(nextForm)
+
+            const parsedGeoloc = nextForm.geoloc.split(',')
             if (parsedGeoloc.length === 2) {
                 setCurrentPosition({ lat: parseFloat(parsedGeoloc[0]), lng: parseFloat(parsedGeoloc[1]) })
                 mapRef.current?.setView({ lat: parseFloat(parsedGeoloc[0]), lng: parseFloat(parsedGeoloc[1]) }, 13)
             }
+
             setIsPageLoading(false)
-        }).catch((error) => {
+        } catch (error: any) {
             if (error?.response?.status === 401 || error?.response?.status === 403) {
                 localStorage.removeItem("token")
                 navigate('/login')
@@ -121,20 +148,16 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
 
             setErrorAlert(error?.response?.data?.message || 'Could not load profile')
             setIsPageLoading(false)
-        })
+        }
     }
 
     const handleImgUpload = async (file: File) => {
         const formData = new FormData()
         formData.append('image', file)
-        await instance.post('/image/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            }
-        }).then((res) => {
+        await instance.post('/image/upload', formData).then((res) => {
             setForm(prev => ({ ...prev, images: [...prev.images].concat(import.meta.env.VITE_URL_API + "/image/" + res.data.url) }))
-        }).catch(() => {
-            setErrorAlert("Could not upload image")
+        }).catch((error) => {
+            setErrorAlert(error?.response?.data?.message || "Could not upload image")
         })
     }
 
@@ -241,6 +264,20 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
             {isPageLoading ? <CircularProgress color="secondary" className="mt-4" /> :
                 <Card sx={{ width: "100%", maxWidth: 560, p: 2 }} elevation={6} style={{ boxShadow: "8px 8px 10px #000000" }}>
                         <Typography variant="h6" fontWeight="bold" textAlign="center" mb={1}>PROFILE</Typography>
+                        <Box sx={{ mb: 2, p: 1.5, borderRadius: 2, border: "1px solid rgba(255, 255, 255, 0.12)", backgroundColor: "rgba(255, 255, 255, 0.03)" }}>
+                            <Typography variant="caption" color="text.secondary" className="d-block fw-bold">
+                                ACCOUNT
+                            </Typography>
+                            <Typography variant="body2" className="text-break">
+                                Username: {form.username || "-"}
+                            </Typography>
+                            <Typography variant="body2" className="text-break">
+                                Name: {form.firstName} {form.lastName}
+                            </Typography>
+                            <Typography variant="body2" className="text-break">
+                                Email: {form.email || "-"}
+                            </Typography>
+                        </Box>
                         <Grid container spacing={2}>
                                 {form.images.map((image, index) => {
                                     return (
@@ -261,7 +298,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                             {imgAreLoading.includes(index) && <CircularProgress color="secondary" />}
                                             <Badge
                                                 color="error"
-                                                badgeContent={<p className="badgeCross" role="button" style={{ cursor: "pointer" }} onClick={(event) => { event.stopPropagation(); handleDeleteImg(index) }}>x</p>}
+                                                badgeContent={<p className="badgeCross" role="button" style={{ cursor: "pointer" }} onClick={(event) => { event.stopPropagation(); void handleDeleteImg(index) }}>x</p>}
                                                 style={{ display: isSubmitting || imgAreLoading.includes(index) ? "none" : "block" }}
                                             >
                                                 <img src={image} alt="profile" className="imgMosaic" onError={(e) => { e.currentTarget.src = goose }} onLoad={() => { setImgAreLoading(prev => prev.filter((value) => value !== index)) }} loading="lazy" />
@@ -340,12 +377,17 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                         </Box>
                         <Divider sx={{ my: 2 }}><Typography fontWeight="bold">TAGS</Typography></Divider>
                         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1, mt: 1 }}>
-                                    {Object.entries(form.tags).map(([key, value], index) => {
+                                    {(availableTags.length ? availableTags : Object.keys(form.tags)).length ? (availableTags.length ? availableTags : Object.keys(form.tags)).map((key, index) => {
+                                        const value = form.tags[key]
                                         return value ?
                                             <Chip key={index} label={key} variant="filled" color="primary"  onClick={() => { }} onDelete={() => handleTagChange(key, false)} disabled={isSubmitting} />
                                             :
                                             <Chip key={index} label={key} variant="outlined" color="primary"  onClick={() => { handleTagChange(key, true) }} disabled={isSubmitting} />
-                                    })}
+                                    }) : (
+                                        <Typography variant="body2" color="text.secondary">
+                                            No tags selected yet.
+                                        </Typography>
+                                    )}
                                 </Box>
                         <Divider sx={{ my: 2 }} />
                         <Box sx={{ position: "relative", mt: 1 }}>

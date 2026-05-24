@@ -227,26 +227,32 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 								<h5 className="ms-1 mb-0 fw-bold">{profile.elo}</h5>
 							</div>
 						</div>
+						<div className="mt-2 mb-2">
+							<Typography variant="caption" color="text.secondary" className="d-block mb-1 fw-bold">
+								TAGS
+							</Typography>
+							<div className="col-12 overflow-y-scroll tagsContainer d-flex">
+								<Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
+									{profile.tags && Object.entries(profile.tags).map(([key, value]) => {
+										const isCommonTag = profile.commonTags && profile.commonTags.includes(key)
+										if (value) {
+											return isCommonTag ?
+												<Chip key={key} label={key} variant="filled" color="primary" className="fw-bold m-0 me-1 mb-1" />
+												:
+												<Chip key={key} label={key} variant="outlined" color="primary" className="fw-bold m-0 me-1 mb-1" />
+										}
+
+										return <Chip key={key} label={key} variant="outlined" color="default" className="fw-bold m-0 me-1 mb-1" sx={{ opacity: 0.45 }} />
+									})}
+								</Stack>
+							</div>
+						</div>
 						<p className="font-size-12 mb-0 d-flex">  {profile.distance == 1 ? "Less than a" : Math.round(profile.distance + Number.EPSILON) || "?"} kilometer from you</p>
 						<hr className="w-100 mt-2" />
 						<p className="text-start text-break">
 							{profile.bio}
 						</p>
 						<hr className="w-100 mt-2" />
-						<div className="col-12 overflow-y-scroll tagsContainer d-flex">
-							<Stack direction="row" spacing={1} useFlexGap sx={{ flexWrap: "wrap", width: "100%" }}>
-								{profile.tags && Object.entries(profile.tags).map(([key, value], index) => {
-									return value ?
-										profile.commonTags && profile.commonTags.includes(key) ?
-
-											<Chip key={index} label={key} variant="filled" color="primary" className="fw-bold m-0 me-1 mb-1" />
-											:
-											<Chip key={index} label={key} variant="outlined" color="primary" className="fw-bold m-0 me-1 mb-1" />
-										:
-										null
-								})}
-							</Stack>
-						</div>
 					</div>
 				</>
 

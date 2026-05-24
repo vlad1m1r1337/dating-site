@@ -6,6 +6,10 @@ def success_200():
     return JSONResponse(status_code=200, content={"message": "OK"})
 
 
+def image_deleted():
+    return JSONResponse(status_code=200, content={"message": "Image deleted successfully"})
+
+
 def success_200_with_data(data):
     return JSONResponse(status_code=200, content={"message": "OK", "data": data})
 

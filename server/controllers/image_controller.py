@@ -6,6 +6,7 @@ from database.database import *
 from responses.errors.errors_401 import authentication_required, incomplete_profile
 from responses.errors.errors_404 import image_not_found
 from services.image_service import image_upload
+from responses.success.success_200 import image_deleted
 from services.user_service import (
     ask_reset_password,
     get_token,
@@ -74,6 +75,39 @@ async def upload_image(request: Request, db=Depends(get_database)):
     if user["completion"] < 1:
         return incomplete_profile()
     return await image_upload(db, user, data["form"])
+
+
+@image_controller.delete(
+    "/{id}",
+    summary="Удалить изображение пользователя",
+    description="Удаляет изображение текущего пользователя из таблицы images и из его профиля.",
+    responses={**auth_responses, 404: {"model": ErrorResponse, "description": "Изображение не найдено"}},
+    openapi_extra={"security": bearer_security},
+)
+async def delete_image(id, request: Request, db=Depends(get_database)):
+    data = {}
+    data["headers"] = request.headers
+    token = get_token(data["headers"])
+    if token is None:
+        return empty_token()
+    user = await search_user_by_token(db, token)
+    if not user:
+        return authentication_required()
+
+    deleted_image = await db.fetchrow(
+        "DELETE FROM images WHERE id = $1 AND user_id = $2 RETURNING id",
+        id,
+        user["id"],
+    )
+    if not deleted_image:
+        return image_not_found()
+
+    await db.execute(
+        "UPDATE users SET images = array_remove(images, $1) WHERE id = $2",
+        id,
+        user["id"],
+    )
+    return image_deleted()
 
 
 @image_controller.get(

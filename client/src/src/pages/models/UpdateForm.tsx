@@ -1,4 +1,5 @@
 export interface UpdateForm {
+    username: string
     firstName: string
     lastName: string
     email: string
