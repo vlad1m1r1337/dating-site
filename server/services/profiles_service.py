@@ -15,7 +15,7 @@ async def get_profiles_filtered(db, user, _filter):
         return invalid_elo()
     if _filter["min_age"] < 18 or _filter["min_age"] > 100 or _filter["max_age"] < 18 or _filter["max_age"] > 99:
         return invalid_age()
-    if _filter["distance"] > 200 or _filter["distance"] < 1:
+    if _filter["distance"] > 1000 or _filter["distance"] < 1:
         return invalid_distance()
     for tag in _filter["wanted_tags"]:
         if tag not in TAGS:

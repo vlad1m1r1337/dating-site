@@ -23,8 +23,9 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
     const [isFiltersModalOpened, setIsFiltersModalOpened] = useState(false)
     const [ageSliderValue, setAgeSliderValue] = useState<number[]>([18, 99])
     const [eloSliderValue, setEloSliderValue] = useState<number[]>([20, 1000])
-    const [distanceSliderValue, setDistanceSliderValue] = useState<number>(50)
+    const [distanceSliderValue, setDistanceSliderValue] = useState<number>(1000)
     const [minTagsSliderValue, setMinTagsSliderValue] = useState<number>(1)
+    const [maxCommonTags, setMaxCommonTags] = useState<number>(1)
     const [areProfilesLoading, setAreProfilesLoading] = useState(true)
     const [profiles, setProfiles] = useState<ProfilesModel[]>([])
     const [wantedTags, setWantedTags] = useState<string[]>([])
@@ -51,10 +52,25 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
         })
     }
 
+    const getUserTagCap = async () => {
+        try {
+            const res = await instance.get('/user')
+            const tags = res.data.tags || {}
+            const activeTags = Object.values(tags).filter(Boolean).length
+            const nextMaxCommonTags = activeTags > 0 ? activeTags : 1
+            setMaxCommonTags(nextMaxCommonTags)
+            return nextMaxCommonTags
+        } catch {
+            setMaxCommonTags(1)
+            return 1
+        }
+    }
+
     const getProfiles = async () => {
-        checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
         setProfiles([])
         setAreProfilesLoading(true)
+        const activeTagCap = await getUserTagCap()
+        checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue, activeTagCap)
         let filterParams = defaultFilterParams
         try {
             filterParams = JSON.parse(localStorage.getItem("filterParams") || "{}")
@@ -78,7 +94,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
         }).catch((err) => {
             if (err.response?.data.message) {
                 if (String(err.response?.data.message).includes('Missing key(s)'))
-                    checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue)
+                    checkFilterParams(setAgeSliderValue, setEloSliderValue, setDistanceSliderValue, setMinTagsSliderValue, maxCommonTags)
                 else
                     setErrorAlert(err.response?.data.message)
             }
@@ -232,7 +248,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
                             <Slider
                                 getAriaLabel={() => 'Distance max'}
                                 min={1}
-                                max={200}
+                                max={1000}
                                 style={{ minWidth: "190px", margin: "24px" }}
                                 valueLabelDisplay="on"
                                 aria-labelledby="distance-slider"
@@ -260,7 +276,7 @@ const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => 
                             <Slider
                                 getAriaLabel={() => 'Minimum common tags'}
                                 min={0}
-                                max={20}
+                                max={maxCommonTags}
                                 style={{ width: "190px", margin: "24px" }}
                                 valueLabelDisplay="on"
                                 aria-labelledby="min-tags-slider"
