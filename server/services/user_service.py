@@ -181,12 +181,18 @@ async def create_user(db, body: dict):
             "email_validation",
         )
         subject = "Welcome to find your best one"
+        validate_url = f"{URL_FRONT}/validate-email/{token_id}"
         content = (
-            f"Welcome to Find your best one, please click on the following link "
-            f"to validate your email address: "
-            f"{URL_FRONT}/validate-email/{token_id}"
+            "Welcome to Find your best one, please click on the following link "
+            "to validate your email address:\n"
+            f"{validate_url}"
         )
-        result = await send_email(body["email"], subject, content)
+        content_html = (
+            "<p>Welcome to Find your best one, please click on the following link "
+            "to validate your email address:</p>"
+            f'<p><a href="{validate_url}">Validate your email</a></p>'
+        )
+        result = await send_email(body["email"], subject, content, html=content_html)
         print(f"Email send result: {result}")
         return account_created()
 
@@ -264,13 +270,18 @@ async def ask_reset_password(db, user):
             "password_reset",
         )
         subject = "Password reset"
+        reset_url = f"{URL_FRONT}/reset-password/{token_id}"
         content = (
-            "You asked for a password reset, please click on the following link to reset your password: "
-            + str(URL_FRONT)
-            + "/reset-password/"
-            + token_id
+            "You asked for a password reset, please click on the following link "
+            "to reset your password:\n"
+            f"{reset_url}"
         )
-        await send_email(email, subject, content)
+        content_html = (
+            "<p>You asked for a password reset, please click on the following link "
+            "to reset your password:</p>"
+            f'<p><a href="{reset_url}">Reset your password</a></p>'
+        )
+        await send_email(email, subject, content, html=content_html)
         return email_ask_reset_password()
     except Exception as e:
         print(e)
@@ -429,13 +440,22 @@ async def update_user(db, user, body):
                 "email_change",
                 body["email"],
             )
+            validate_url = f"{URL_FRONT}/validate-email/{token_id}"
+            content = (
+                "You asked for an email change, please click on the following link "
+                "to validate your new email address:\n"
+                f"{validate_url}"
+            )
+            content_html = (
+                "<p>You asked for an email change, please click on the following link "
+                "to validate your new email address:</p>"
+                f'<p><a href="{validate_url}">Validate your new email</a></p>'
+            )
             await send_email(
                 user["email"],
                 "Email change",
-                "You asked for an email change, please click on the following link to validate your new email address: "
-                + str(URL_FRONT)
-                + "validate-email/"
-                + token_id,
+                content,
+                html=content_html,
             )
         await db.execute(
             """UPDATE users SET first_name = $1, last_name = $2, age = $3, orientation = $4, gender = $5, bio = $6, tags = $7, images = $8, geoloc = $9 WHERE id = $10""",
