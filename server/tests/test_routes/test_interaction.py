@@ -10,6 +10,7 @@ _id = None
 
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8765")
 
 
 @pytest.mark.order(5)
@@ -19,7 +20,7 @@ async def test_like_user():
     id = await generate_id()
     _id = id
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{id}/like",
+        f"{BACKEND_URL}/user/{id}/like",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 201
@@ -31,7 +32,7 @@ async def test_like_user():
 
 @pytest.mark.order(5)
 def test_like_user_without_token():
-    response = requests.post(f"https://back-matcha.pandeo.fr/user/{_id}/like")
+    response = requests.post(f"{BACKEND_URL}/user/{_id}/like")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -39,7 +40,7 @@ def test_like_user_without_token():
 @pytest.mark.order(5)
 def test_like_user_already_liked():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/like",
+        f"{BACKEND_URL}/user/{_id}/like",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 401
@@ -49,7 +50,7 @@ def test_like_user_already_liked():
 @pytest.mark.order(5)
 def test_skip_user_already_liked():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/skip",
+        f"{BACKEND_URL}/user/{_id}/skip",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 401
@@ -58,14 +59,14 @@ def test_skip_user_already_liked():
 
 @pytest.mark.order(5)
 def test_skip_user_without_token():
-    response = requests.post(f"https://back-matcha.pandeo.fr/user/{_id}/skip")
+    response = requests.post(f"{BACKEND_URL}/user/{_id}/skip")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
 
 @pytest.mark.order(5)
 def test_unlike_user_without_token():
-    response = requests.delete(f"https://back-matcha.pandeo.fr/user/{_id}/like")
+    response = requests.delete(f"{BACKEND_URL}/user/{_id}/like")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -73,7 +74,7 @@ def test_unlike_user_without_token():
 @pytest.mark.order(5)
 def test_unlike_user():
     response = requests.delete(
-        f"https://back-matcha.pandeo.fr/user/{_id}/like",
+        f"{BACKEND_URL}/user/{_id}/like",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 200
@@ -86,7 +87,7 @@ def test_unlike_user():
 @pytest.mark.order(5)
 def test_skip_user():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/skip",
+        f"{BACKEND_URL}/user/{_id}/skip",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 201
@@ -99,7 +100,7 @@ def test_skip_user():
 @pytest.mark.order(5)
 def test_skip_user_already_skipped():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/skip",
+        f"{BACKEND_URL}/user/{_id}/skip",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 401
@@ -108,27 +109,27 @@ def test_skip_user_already_skipped():
 
 @pytest.mark.order(5)
 def test_unskip_user_without_token():
-    response = requests.delete(f"https://back-matcha.pandeo.fr/user/{_id}/skip")
+    response = requests.delete(f"{BACKEND_URL}/user/{_id}/skip")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
 @pytest.mark.order(5)
 def test_unskip_user():
-    response = requests.delete(f"https://back-matcha.pandeo.fr/user/{_id}/skip",
+    response = requests.delete(f"{BACKEND_URL}/user/{_id}/skip",
         headers={"authorization": "Bearer %s" % generate_token()})
     assert response.status_code == 200
     assert response.json() == {"message": "You successfully unskipped this user", "status": "unskip"}
 
 @pytest.mark.order(5)
 def test_block_user_without_token():
-    response = requests.post(f"https://back-matcha.pandeo.fr/user/{_id}/block")
+    response = requests.post(f"{BACKEND_URL}/user/{_id}/block")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
 @pytest.mark.order(5)
 def test_block_user():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/block",
+        f"{BACKEND_URL}/user/{_id}/block",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 201
@@ -140,7 +141,7 @@ def test_block_user():
 @pytest.mark.order(5)
 def test_block_user_already_blocked():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/block",
+        f"{BACKEND_URL}/user/{_id}/block",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 401
@@ -150,14 +151,14 @@ def test_block_user_already_blocked():
 
 @pytest.mark.order(5)
 def test_report_user_without_token():
-    response = requests.post(f"https://back-matcha.pandeo.fr/user/{_id}/report")
+    response = requests.post(f"{BACKEND_URL}/user/{_id}/report")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
 @pytest.mark.order(5)
 def test_report_user():
     response = requests.post(
-        f"https://back-matcha.pandeo.fr/user/{_id}/report",
+        f"{BACKEND_URL}/user/{_id}/report",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 201

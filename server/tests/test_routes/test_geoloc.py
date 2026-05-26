@@ -11,7 +11,7 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 @pytest.mark.order(5)
 def test_get_geoloc():
-    response = requests.get("https://back-matcha.pandeo.fr/geoloc",
+    response = requests.get(f"{BACKEND_URL}/geoloc",
         headers={"authorization": "Bearer %s" % generate_token()})
     assert response.status_code == 200
 

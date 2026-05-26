@@ -1,10 +1,14 @@
-import json
+import asyncio
+import datetime
+import os
 import random
+import secrets
 import string
-import requests
+import uuid
+
 import asyncpg
 import dotenv
-import os
+import requests
 
 str = "".join(
     random.choices(
@@ -20,14 +24,44 @@ def generate_token():
     global token
     if token is not None:
         return token
-    data = {"username": "%s" % str, "password": "Qw@rty123456"}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/user/login", json.dumps(data)
-    )
-    assert response.status_code == 200
-    assert response.json()["message"] == "Login Success"
-    assert response.json()["token"] is not None
-    token = response.json()["token"]
+    preset_token = os.getenv("LOCAL_TEST_TOKEN")
+    if preset_token:
+        token = preset_token
+        return token
+
+    async def _create_token():
+        db = await asyncpg.connect(DATABASE_URL)
+        try:
+            user = await db.fetchrow(
+                """
+                SELECT id
+                FROM users
+                WHERE completion >= 1
+                ORDER BY random()
+                LIMIT 1
+                """
+            )
+            if not user:
+                user = await db.fetchrow("SELECT id FROM users ORDER BY random() LIMIT 1")
+            token_id = f"{uuid.uuid4()}"
+            token_value = secrets.token_urlsafe(48)
+            now = datetime.datetime.now(datetime.timezone.utc).timestamp()
+            await db.execute(
+                """
+                INSERT INTO token (id, token, user_id, creation_date, last_activity)
+                VALUES ($1, $2, $3, $4, $5)
+                """,
+                token_id,
+                token_value,
+                user["id"],
+                now,
+                now,
+            )
+            return token_value
+        finally:
+            await db.close()
+
+    token = asyncio.run(_create_token())
     return token
 
 

@@ -8,12 +8,13 @@ from conftest import str, generate_token
 
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8765")
 
 
 @pytest.mark.order(3)
 def test_ask_reset_password():
     response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password/new",
+        f"{BACKEND_URL}/email/password/new",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 200
@@ -24,7 +25,7 @@ def test_ask_reset_password():
 
 @pytest.mark.order(3)
 def test_ask_reset_password_without_token():
-    response = requests.post("https://back-matcha.pandeo.fr/email/password/new")
+    response = requests.post(f"{BACKEND_URL}/email/password/new")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -32,7 +33,7 @@ def test_ask_reset_password_without_token():
 @pytest.mark.order(3)
 def test_ask_reset_password_with_random_token():
     response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password/new",
+        f"{BACKEND_URL}/email/password/new",
         headers={"authorization": "Bearer _invalid"},
     )
     assert response.status_code == 401
@@ -42,7 +43,7 @@ def test_ask_reset_password_with_random_token():
 @pytest.mark.order(3)
 def test_reset_password_with_empty_token():
     response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password",
+        f"{BACKEND_URL}/email/password",
         headers={"authorization": "Bearer "},
     )
     assert response.status_code == 400
@@ -52,7 +53,7 @@ def test_reset_password_with_empty_token():
 @pytest.mark.order(3)
 def test_reset_password_with_invalid_body():
     data = "{"
-    response = requests.post("https://back-matcha.pandeo.fr/email/password", data)
+    response = requests.post(f"{BACKEND_URL}/email/password", data)
     assert response.status_code == 400
     assert response.json() == {"message": "Missing or invalid body"}
 
@@ -70,7 +71,7 @@ async def test_reset_password_wrong_password():
     )
     data = {"password": "Qw@", "token": token["id"]}
     response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password", json.dumps(data)
+        f"{BACKEND_URL}/email/password", json.dumps(data)
     )
     assert response.status_code == 422
     assert response.json() == {"message": "Invalid password"}
@@ -81,7 +82,7 @@ async def test_reset_password_wrong_password():
 def test_reset_password_with_invalid_type():
     data = {"password": 0}
     response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password", json.dumps(data)
+        f"{BACKEND_URL}/email/password", json.dumps(data)
     )
     assert response.status_code == 400
     assert response.json() == {"message": "Missing key(s): ['token']"}
@@ -99,9 +100,7 @@ async def test_reset_password():
         user_id["user_id"],
     )
     data = {"password": "Qw@rty123456", "token": token["id"]}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/email/password", json.dumps(data)
-    )
+    response = requests.post(f"{BACKEND_URL}/email/password", json.dumps(data))
     assert response.status_code == 200
     assert response.json() == {"message": "Your password has been reset"}
     await db.close()

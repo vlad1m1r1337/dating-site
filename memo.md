@@ -10,3 +10,7 @@ SELECT COUNT(*) FROM email_validation;
 SELECT COUNT(*) FROM chat;
 ```
 
+## Swagger
+```
+http://localhost:8765/docs
+```

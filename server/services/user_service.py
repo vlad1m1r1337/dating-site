@@ -747,14 +747,14 @@ async def get_views_by_user(db, user):
 async def get_likes_by_user(db, user):
     try:
         result = await db.fetch(
-            """SELECT * FROM interactions WHERE recipient = $1 AND (type = 'like')""",
+            """SELECT * FROM interactions WHERE recipient = $1 AND type = 'like'""",
             user["id"],
         )
         if not result:
             return []
         parsed = []
-        for view in result:
-            user = await search_user_by_id(db, view["origin"])
+        for like_row in result:
+            user = await search_user_by_id(db, like_row["origin"])
             _user = {
                 'image': user["images"][0] if user["images"] else "",
                 'firstName': user["first_name"],

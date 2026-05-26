@@ -1,6 +1,4 @@
 import json
-import random
-import string
 import asyncpg
 import pytest
 import requests
@@ -10,6 +8,7 @@ from conftest import str, generate_token, TAGS
 
 dotenv.load_dotenv()
 DATABASE_URL = os.getenv("DATABASE_URL")
+BACKEND_URL = os.getenv("BACKEND_URL", "http://localhost:8765")
 
 
 @pytest.mark.order(1)
@@ -21,7 +20,7 @@ def test_create_user():
         "firstName": "test",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     print(response.json())
     assert response.status_code == 201
 
@@ -35,7 +34,7 @@ def test_create_user_already_exists():
         "firstName": "test",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 400
     assert response.json() == {"message": "Email already exists"}
 
@@ -49,7 +48,7 @@ def test_create_user_invalid_email():
         "firstName": "test",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 422
     assert response.json() == {"message": "The email provided is invalid"}
 
@@ -63,7 +62,7 @@ def test_create_user_invalid_password():
         "firstName": "test",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 422
     assert response.json() == {"message": "Invalid password"}
 
@@ -77,7 +76,7 @@ def test_create_user_invalid_username():
         "firstName": "test",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 422
     assert response.json() == {"message": "Invalid username"}
 
@@ -91,7 +90,7 @@ def test_create_user_invalid_lastname():
         "firstName": "test",
         "lastName": "_invalid",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 422
     assert response.json() == {"message": "Invalid last name"}
 
@@ -105,7 +104,7 @@ def test_create_user_invalid_firstname():
         "firstName": "_invalid",
         "lastName": "test",
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 422
     assert response.json() == {"message": "Invalid first name"}
 
@@ -113,7 +112,7 @@ def test_create_user_invalid_firstname():
 @pytest.mark.order(1)
 def test_create_user_invalid_body():
     data = "{"
-    response = requests.post("https://back-matcha.pandeo.fr/user", data)
+    response = requests.post(f"{BACKEND_URL}/user", data)
     assert response.status_code == 400
     assert response.json() == {"message": "Missing or invalid body"}
 
@@ -127,7 +126,7 @@ def test_create_user_invalid_type():
         "firstName": 0,
         "lastName": {},
     }
-    response = requests.post("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.post(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 400
     assert response.json() == {
         "message": "Wrong type key(s): ['username', 'email', 'password', 'firstName', 'lastName']"
@@ -137,9 +136,7 @@ def test_create_user_invalid_type():
 @pytest.mark.order(2)
 def test_login_user_not_validated():
     data = {"username": "%s" % str, "password": "Qw@rty123456"}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/user/login", json.dumps(data)
-    )
+    response = requests.post(f"{BACKEND_URL}/user/login", json.dumps(data))
     print(response.json())
     assert response.status_code == 422
     assert response.json() == {
@@ -150,9 +147,7 @@ def test_login_user_not_validated():
 @pytest.mark.order(2)
 def test_login_user_invalid_username():
     data = {"username": "_invalid", "password": "Qw@rty123456"}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/user/login", json.dumps(data)
-    )
+    response = requests.post(f"{BACKEND_URL}/user/login", json.dumps(data))
     print(response.json())
     assert response.status_code == 401
 
@@ -160,9 +155,7 @@ def test_login_user_invalid_username():
 @pytest.mark.order(2)
 def test_login_user_not_exist():
     data = {"username": "oui%s" % str, "password": "Qw@rty123456"}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/user/login", json.dumps(data)
-    )
+    response = requests.post(f"{BACKEND_URL}/user/login", json.dumps(data))
     print(response.json())
     assert response.status_code == 401
 
@@ -173,9 +166,7 @@ async def test_login_user():
     db = await asyncpg.connect(DATABASE_URL)
     await db.execute("UPDATE users SET completion = 1 WHERE username = $1", str)
     data = {"username": "%s" % str, "password": "Qw@rty123456"}
-    response = requests.post(
-        "https://back-matcha.pandeo.fr/user/login", json.dumps(data)
-    )
+    response = requests.post(f"{BACKEND_URL}/user/login", json.dumps(data))
     assert response.status_code == 200
     assert response.json()["message"] == "Login Success"
     assert response.json()["token"] is not None
@@ -184,7 +175,7 @@ async def test_login_user():
 
 @pytest.mark.order(2)
 def test_get_session_without_token():
-    response = requests.get("https://back-matcha.pandeo.fr/user/session")
+    response = requests.get(f"{BACKEND_URL}/user/session")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -192,7 +183,7 @@ def test_get_session_without_token():
 @pytest.mark.order(2)
 def test_get_session_invalid_token():
     response = requests.get(
-        "https://back-matcha.pandeo.fr/user/session",
+        f"{BACKEND_URL}/user/session",
         headers={"authorization": "Bearer invalid_token"},
     )
     assert response.status_code == 401
@@ -202,7 +193,7 @@ def test_get_session_invalid_token():
 @pytest.mark.order(2)
 def test_get_session():
     response = requests.get(
-        "https://back-matcha.pandeo.fr/user/session",
+        f"{BACKEND_URL}/user/session",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 200
@@ -212,7 +203,7 @@ def test_get_session():
 @pytest.mark.order(2)
 def test_get_user():
     response = requests.get(
-        "https://back-matcha.pandeo.fr/user/session",
+        f"{BACKEND_URL}/user/session",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     print(response.json(), generate_token())
@@ -221,7 +212,7 @@ def test_get_user():
 
 @pytest.mark.order(2)
 def test_get_specific_user_without_token():
-    response = requests.get("https://back-matcha.pandeo.fr/user/1")
+    response = requests.get(f"{BACKEND_URL}/user/1")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -229,7 +220,7 @@ def test_get_specific_user_without_token():
 @pytest.mark.order(2)
 def test_get_specific_user_random_id():
     response = requests.get(
-        "https://back-matcha.pandeo.fr/user/99",
+        f"{BACKEND_URL}/user/99",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 404
@@ -242,7 +233,7 @@ async def test_get_specific_user():
     db = await asyncpg.connect(DATABASE_URL)
     user_id = await db.fetchrow("SELECT id FROM users WHERE username = $1", str)
     response = requests.get(
-        "https://back-matcha.pandeo.fr/user/%s" % user_id["id"],
+        f"{BACKEND_URL}/user/%s" % user_id["id"],
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 200
@@ -255,7 +246,7 @@ def test_update_profile_without_token():
         "lastName": "Theo",
         "firstName": "Nard",
         "images": [
-            "https://back-matcha.pandeo.fr/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
+            f"{BACKEND_URL}/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
         ],
         "bio": "Oui",
         "tags": {"vegan": True},
@@ -264,7 +255,7 @@ def test_update_profile_without_token():
         "gender": "male",
         "geoloc": "0,0"
     }
-    response = requests.put("https://back-matcha.pandeo.fr/user", json.dumps(data))
+    response = requests.put(f"{BACKEND_URL}/user", json.dumps(data))
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -272,7 +263,7 @@ def test_update_profile_without_token():
 @pytest.mark.order(4)
 def test_update_profile_random():
     response = requests.put(
-        "https://back-matcha.pandeo.fr/user",
+        f"{BACKEND_URL}/user",
         "{}",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
@@ -290,7 +281,7 @@ def test_update_profile_invalid_tags():
         "lastName": "Theo",
         "firstName": "Nard",
         "images": [
-            "https://back-matcha.pandeo.fr/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
+            f"{BACKEND_URL}/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
         ],
         "bio": "Oui",
         "tags": {"vegan": True},
@@ -300,7 +291,7 @@ def test_update_profile_invalid_tags():
         "geoloc": "0,0"
     }
     response = requests.put(
-        "https://back-matcha.pandeo.fr/user",
+        f"{BACKEND_URL}/user",
         json.dumps(data),
         headers={"authorization": "Bearer %s" % generate_token()},
     )
@@ -314,7 +305,7 @@ def test_update_profile():
         "lastName": "Theo",
         "firstName": "Nard",
         "images": [
-            "https://back-matcha.pandeo.fr/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
+            f"{BACKEND_URL}/image/0c86c1d7-2b84-453e-9a32-978d576fc552"
         ],
         "bio": "Oui",
         "tags": TAGS,
@@ -324,7 +315,7 @@ def test_update_profile():
         "geoloc": "0,0"
     }
     response = requests.put(
-        "https://back-matcha.pandeo.fr/user",
+        f"{BACKEND_URL}/user",
         json.dumps(data),
         headers={"authorization": "Bearer %s" % generate_token()},
     )
@@ -335,7 +326,7 @@ def test_update_profile():
 
 @pytest.mark.order(100)
 def test_logout_without_token():
-    response = requests.post("https://back-matcha.pandeo.fr/user/logout")
+    response = requests.post(f"{BACKEND_URL}/user/logout")
     assert response.status_code == 401
     assert response.json() == {"message": "Authentication is required"}
 
@@ -343,7 +334,7 @@ def test_logout_without_token():
 @pytest.mark.order(100)
 def test_logout():
     response = requests.post(
-        "https://back-matcha.pandeo.fr/user/logout",
+        f"{BACKEND_URL}/user/logout",
         headers={"authorization": "Bearer %s" % generate_token()},
     )
     assert response.status_code == 200
