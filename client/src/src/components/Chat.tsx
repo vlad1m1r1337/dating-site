@@ -1,242 +1,125 @@
-import { useEffect, useMemo, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import instance from "../api/Instance"
-import { Avatar, Badge, BadgeProps, Box, Button, Divider, List, ListItem, ListItemAvatar, ListItemText, Paper, TextField, Typography, styled } from "@mui/material"
+import { CircularProgress } from "@mui/material"
 import { ChatMessage, ChatModel, ChatRoom } from "./models/ChatModel"
-import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-import goose from "../../assets/goose.jpg"
-import SendIcon from '@mui/icons-material/Send';
 import { StatusListModel } from "../pages/models/StatusListModel";
-import CloseIcon from '@mui/icons-material/Close';
 import AvatarPlaceholder from './AvatarPlaceholder'
+import ChatRoomList from "./chat/chat-room-list"
+import ChatRoomView from "./chat/chat-room-view"
 
 interface ChatProps {
     statusList: StatusListModel
 }
 const Chat = ({ statusList }: ChatProps) => {
-    const socketChat = useMemo(() => {
-        return new WebSocket(import.meta.env.VITE_WS_API + "/chat?token=" + localStorage.getItem("token"))
-    }, [])
     const [data, setData] = useState<ChatModel>()
     const [roomSelected, setRoomSelected] = useState<ChatRoom>()
-    const [images, setImages] = useState<HTMLImageElement[]>([])
-    const scrollToBottom = () => {
-        if (roomSelected) {
-            const chatBox = document.getElementById("chatZone")
-            chatBox?.scrollTo(0, chatBox.scrollHeight)
-        }
-    }
-    socketChat.onmessage = (event) => {
-        let data: ChatMessage | null = null
-        try {
-            data = JSON.parse(event.data)
-        } catch (e) {
-            return
-        }
-        if (roomSelected && data && data?.id === roomSelected.id) {
-            setRoomSelected((room) => {
-                if (!room || !data) return room
-                return {
-                    ...room,
-                    messages: [...room.messages, {
-                        ...data,
-                        id: data.id,
-                    }],
-                }
-            })
-        }
-    }
+    const [messageText, setMessageText] = useState('')
+    const chatBoxRef = useRef<HTMLDivElement>(null)
 
-    const preloadImages = (images: string[]) => {
-        const imgArray: HTMLImageElement[] = []
-        images.forEach((image) => {
-            const img = new Image()
-            img.src = import.meta.env.VITE_URL_API + "/image/" + image
-            imgArray.push(img)
-        })
-        setImages(imgArray)
-    }
-
-    const getChat = async () => {
+    const getChat = useCallback(async () => {
         await instance.get<ChatModel>('/chat').then((res) => {
-            if (res.data.rooms.length)
-                preloadImages(res.data.rooms.map(room => room.user_2.image))
             setData(res.data)
         }).catch(() => {
+            setData(undefined)
         })
-    }
-    const postMessage = async () => {
+    }, [])
+
+    const handleSocketMessage = useCallback((event: MessageEvent) => {
+        let message: ChatMessage | null = null
+        try {
+            message = JSON.parse(event.data)
+        } catch {
+            return
+        }
+
+        setRoomSelected((room) => {
+            if (!room || !message || message.id !== room.id) {
+                return room
+            }
+
+            return {
+                ...room,
+                messages: [...room.messages, message],
+            }
+        })
+    }, [])
+
+    const postMessage = useCallback(async () => {
         if (!roomSelected) return
-        const tempMessage = (document.getElementById("newMessage") as HTMLInputElement)?.value || "";
-        (document.getElementById("newMessage") as HTMLInputElement).value = ""
-        instance.post('/chat/' + roomSelected.id + '/message', { 'content': tempMessage }).then(() => {
-        }).catch(() => {
-            (document.getElementById("newMessage") as HTMLInputElement).value = tempMessage
+        const content = messageText.trim()
+        if (!content) return
+
+        setMessageText('')
+        await instance.post(`/chat/${roomSelected.id}/message`, { content }).catch(() => {
+            setMessageText(content)
         })
-    }
+    }, [messageText, roomSelected])
+
+    const closeRoom = useCallback(() => {
+        setRoomSelected(undefined)
+        getChat()
+    }, [getChat])
+
     useEffect(() => {
         getChat()
+    }, [getChat])
+
+    useEffect(() => {
+        const socketChat = new WebSocket(`${import.meta.env.VITE_WS_API}/chat?token=${localStorage.getItem("token")}`)
+        socketChat.onmessage = handleSocketMessage
+
         return () => {
             socketChat.close()
         }
-    }, [])
+    }, [handleSocketMessage])
 
     useEffect(() => {
-        scrollToBottom()
+        chatBoxRef.current?.scrollTo(0, chatBoxRef.current.scrollHeight)
     }, [roomSelected])
 
-    const StyledBadge = styled(Badge)<BadgeProps>(() => ({
-        '& .MuiBadge-badge': {
-            border: `1px solid`,
-            width: '14px',
-            height: '14px',
-            minWidth: '14px',
-            color: '#FFFFFF',
-            backgroundColor: '#4CAF50',
-        },
-    }));
+    const renderContent = () => {
+        if (roomSelected) {
+            return (
+                <ChatRoomView
+                    room={roomSelected}
+                    statusList={statusList}
+                    chatBoxRef={chatBoxRef}
+                    messageText={messageText}
+                    setMessageText={setMessageText}
+                    closeRoom={closeRoom}
+                    postMessage={postMessage}
+                />
+            )
+        }
+
+        if (data && data.rooms.length) {
+            return (
+                <ChatRoomList
+                    rooms={data.rooms}
+                    statusList={statusList}
+                    selectRoom={setRoomSelected}
+                />
+            )
+        }
+
+        if (!data) {
+            return (
+                <div className="skeletonHeight">
+                    <CircularProgress color="secondary" />
+                </div>
+            )
+        }
+
+        return (
+            <div className="skeletonHeight display-flex flex-column position-relative">
+                <AvatarPlaceholder className="w-100" />
+            </div>
+        )
+    }
 
     return (
         <div className="chatParent w-100 h-100">
-            {roomSelected ?
-                <div className="chatChannel">
-                    <div className="d-flex justify-content-between w-100 mb-2">
-                        <div className="d-flex align-items-center text-truncate">
-                            <StyledBadge
-                                anchorOrigin={{
-                                    vertical: 'bottom',
-                                    horizontal: 'right',
-                                }}
-                                sx={{ padding: "0 0 2px 2px" }}
-                                overlap="circular"
-                                badgeContent=" "
-                                invisible={statusList && statusList.users && statusList.users.includes(roomSelected?.user_2?.id) ? false : true}
-                            >
-                                <Avatar alt={roomSelected.user_2?.firstName || "Avatar"} src={roomSelected.user_2?.image ? roomSelected.user_2.image : goose} />
-                            </StyledBadge>
-                            <Typography ml={1} variant="h6" fontWeight="bold">{roomSelected.user_2?.firstName}</Typography>
-                        </div>
-                        <Button className="closeButton" onClick={() => { setRoomSelected(undefined); getChat() }} title="Close">
-                            <CloseIcon color="primary" />
-                        </Button>
-                    </div>
-                    <Box
-                        className="chatBox"
-                        sx={{
-                            display: "flex",
-                            flexDirection: "column",
-                            bgcolor: "grey.200",
-                            borderRadius: "6px",
-                        }}
-                    >
-                        <Box sx={{ flexGrow: 1, overflow: "auto", p: 2 }} id="chatZone">
-                            {roomSelected.messages.map((message, index: number) => (
-                                <Box
-                                    key={index}
-                                    sx={{
-                                        display: "flex",
-                                        justifyContent: message.user_id === roomSelected.user_2.id ? "flex-start" : "flex-end",
-                                        mb: 2,
-                                    }}
-                                >
-                                    <Box
-                                        sx={{
-                                            display: "flex",
-                                            flexDirection: message.user_id === roomSelected.user_2.id ? "row" : "row-reverse",
-                                            alignItems: "center",
-                                        }}
-                                    >
-                                        <Avatar src={message.user_id === roomSelected.user_2.id ? ((import.meta.env.VITE_URL_API + "/image/" + roomSelected.user_2?.image) || goose) : ((import.meta.env.VITE_URL_API + "/image/" + roomSelected.user_1?.image) || goose)} />
-                                        <Paper
-                                            variant="outlined"
-                                            sx={{
-                                                p: 1,
-                                                ml: message.user_id === roomSelected.user_2.id ? 1 : 0,
-                                                mr: message.user_id === roomSelected.user_2.id ? 0 : 1,
-                                                backgroundColor: message.user_id === roomSelected.user_2.id ? "primary.light" : "secondary.light",
-                                                borderRadius: message.user_id === roomSelected.user_2.id ? "20px 20px 20px 5px" : "20px 20px 5px 20px",
-                                            }}
-                                        >
-                                            <Typography sx={{ wordBreak: "break-all" }} variant="body1">{message.content}</Typography>
-                                        </Paper>
-                                    </Box>
-                                </Box>
-                            ))}
-                        </Box>
-                        <Box sx={{ p: 2, display: "flex" }}>
-                            <TextField
-                                size="small"
-                                fullWidth
-                                inputProps={{ maxLength: 400 }}
-                                placeholder="Type a message"
-                                variant="outlined"
-                                id="newMessage"
-                                sx={{
-                                    "& .MuiInputBase-input": { color: "#000" },
-                                    "& .MuiInputBase-input::placeholder": { color: "#000", opacity: 1 },
-                                }}
-                                onKeyDown={async (e) => {
-                                    if (e.key === "Enter") {
-                                        await postMessage()
-                                    }
-                                }
-                                }
-                            />
-                            <Button
-                                fullWidth
-                                color="primary"
-                                variant="contained"
-                                endIcon={<SendIcon />}
-                                style={{ marginLeft: "4px", width: "100px" }}
-                                onClick={async () => {
-                                    await postMessage()
-                                }}
-                            >
-                                Send
-                            </Button>
-                        </Box>
-                    </Box>
-                </div>
-                :
-                data && data.rooms.length ?
-                    <>
-                        {/* <Typography variant="h6" fontWeight="bold">CHATS</Typography> */}
-                        <List className="chatList">
-                            {data.rooms.map((room: ChatRoom, index: number) => {
-                                return (
-                                    <div className="chatListItemParent w-100" key={index}>
-                                        <ListItem alignItems="center" className="chatListItem w-100" onClick={() => { setRoomSelected(room) }}>
-                                            <ListItemAvatar>
-                                                <StyledBadge
-                                                    anchorOrigin={{
-                                                        vertical: 'bottom',
-                                                        horizontal: 'right',
-                                                    }}
-                                                    overlap="circular"
-                                                    badgeContent=" "
-                                                    sx={{ padding: "0 0 4px 4px" }}
-                                                    invisible={statusList && statusList.users && statusList.users.includes(room?.user_2?.id) ? false : true}
-                                                >
-                                                    <Avatar alt={room.user_2?.firstName || "Avatar"} src={images.length > index && images[index] ? images[index].src : goose} />
-                                                </StyledBadge>
-                                            </ListItemAvatar>
-                                            <ListItemText
-                                                primary={room.user_2?.firstName || ""}
-                                                secondary={room.messages?.length ? room.messages[room.messages.length - 1].content : "Say hi to your match!"}
-                                            />
-                                            <KeyboardArrowRightIcon />
-                                        </ListItem>
-                                        <Divider variant="inset" component="li" />
-                                    </div>
-                                )
-                            })}
-                        </List>
-                    </>
-                    :
-                    <div className="skeletonHeight display-flex flex-column position-relative">
-                        {/* <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">CHATS</Typography> */}
-                        <AvatarPlaceholder className="w-100" />
-                    </div>
-            }
+            {renderContent()}
         </div>
     )
 }

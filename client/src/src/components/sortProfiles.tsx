@@ -7,13 +7,13 @@ import SwapVertIcon from '@mui/icons-material/SwapVert';
 import SortRoundedIcon from '@mui/icons-material/SortRounded';
 import { ProfilesModel } from "./models/ProfilesModel";
 
-enum SortEnum {
+enum SORT_DIRECTIONS {
     ASCENDING = 'asc',
     DESCENDING = 'desc',
     NULL = 0,
 }
 
-enum SortCategoryEnum {
+enum SORT_CATEGORIES {
     AGE = 'age',
     ELO = 'elo',
     DISTANCE = 'distance',
@@ -27,51 +27,63 @@ interface SortProfilesComponentProps {
 
 const SortProfilesComponent = ({ profiles, setProfiles }: SortProfilesComponentProps) => {
     const [sortParams, setSortParams] = useState({
-        age: SortEnum.NULL,
-        elo: SortEnum.NULL,
-        distance: SortEnum.NULL,
-        commonTags: SortEnum.NULL,
+        age: SORT_DIRECTIONS.NULL,
+        elo: SORT_DIRECTIONS.NULL,
+        distance: SORT_DIRECTIONS.NULL,
+        commonTags: SORT_DIRECTIONS.NULL,
     })
     const [isSortModalOpened, setIsSortModalOpened] = useState(false)
 
-    const sortProfiles = (sort: SortCategoryEnum) => {
+    const renderSortIcon = (sortDirection: SORT_DIRECTIONS) => {
+        if (sortDirection === SORT_DIRECTIONS.ASCENDING) {
+            return <NorthEastIcon color="primary" />
+        }
+
+        if (sortDirection === SORT_DIRECTIONS.DESCENDING) {
+            return <SouthEastIcon color="primary" />
+        }
+
+        return <SwapVertIcon color="primary" />
+    }
+
+    const sortProfiles = (sort: SORT_CATEGORIES) => {
         const sortedProfiles = [...profiles]
         switch (sort) {
-            case SortCategoryEnum.AGE:
+            case SORT_CATEGORIES.AGE:
                 sortedProfiles.sort((a, b) => {
-                    if (sortParams.age === SortEnum.ASCENDING)
+                    if (sortParams.age === SORT_DIRECTIONS.ASCENDING)
                         return a.age - b.age
                     else
                         return b.age - a.age
                 })
-                setSortParams(prev => ({ ...prev, age: prev.age === SortEnum.ASCENDING ? SortEnum.DESCENDING : SortEnum.ASCENDING, elo: SortEnum.NULL, distance: SortEnum.NULL, commonTags: SortEnum.NULL }))
+                setSortParams(prev => ({ ...prev, age: prev.age === SORT_DIRECTIONS.ASCENDING ? SORT_DIRECTIONS.DESCENDING : SORT_DIRECTIONS.ASCENDING, elo: SORT_DIRECTIONS.NULL, distance: SORT_DIRECTIONS.NULL, commonTags: SORT_DIRECTIONS.NULL }))
                 break
-            case SortCategoryEnum.ELO:
+            case SORT_CATEGORIES.ELO:
                 sortedProfiles.sort((a, b) => {
-                    if (sortParams.elo === SortEnum.ASCENDING)
+                    if (sortParams.elo === SORT_DIRECTIONS.ASCENDING)
                         return a.elo - b.elo
                     else
                         return b.elo - a.elo
                 })
-                setSortParams(prev => ({ ...prev, elo: prev.elo === SortEnum.ASCENDING ? SortEnum.DESCENDING : SortEnum.ASCENDING, age: SortEnum.NULL, distance: SortEnum.NULL, commonTags: SortEnum.NULL }))
+                setSortParams(prev => ({ ...prev, elo: prev.elo === SORT_DIRECTIONS.ASCENDING ? SORT_DIRECTIONS.DESCENDING : SORT_DIRECTIONS.ASCENDING, age: SORT_DIRECTIONS.NULL, distance: SORT_DIRECTIONS.NULL, commonTags: SORT_DIRECTIONS.NULL }))
                 break
-            case SortCategoryEnum.DISTANCE:
+            case SORT_CATEGORIES.DISTANCE:
                 sortedProfiles.sort((a, b) => {
-                    if (sortParams.distance === SortEnum.ASCENDING)
+                    if (sortParams.distance === SORT_DIRECTIONS.ASCENDING)
                         return a.distance - b.distance
                     else
                         return b.distance - a.distance
                 })
-                setSortParams(prev => ({ ...prev, distance: prev.distance === SortEnum.ASCENDING ? SortEnum.DESCENDING : SortEnum.ASCENDING, age: SortEnum.NULL, elo: SortEnum.NULL, commonTags: SortEnum.NULL }))
+                setSortParams(prev => ({ ...prev, distance: prev.distance === SORT_DIRECTIONS.ASCENDING ? SORT_DIRECTIONS.DESCENDING : SORT_DIRECTIONS.ASCENDING, age: SORT_DIRECTIONS.NULL, elo: SORT_DIRECTIONS.NULL, commonTags: SORT_DIRECTIONS.NULL }))
                 break
-            case SortCategoryEnum.COMMONTAGS:
+            case SORT_CATEGORIES.COMMONTAGS:
                 sortedProfiles.sort((a, b) => {
-                    if (sortParams.commonTags === SortEnum.ASCENDING)
+                    if (sortParams.commonTags === SORT_DIRECTIONS.ASCENDING)
                         return a.commonTags.length - b.commonTags.length
                     else
                         return b.commonTags.length - a.commonTags.length
                 })
-                setSortParams(prev => ({ ...prev, commonTags: prev.commonTags === SortEnum.ASCENDING ? SortEnum.DESCENDING : SortEnum.ASCENDING, age: SortEnum.NULL, elo: SortEnum.NULL, distance: SortEnum.NULL }))
+                setSortParams(prev => ({ ...prev, commonTags: prev.commonTags === SORT_DIRECTIONS.ASCENDING ? SORT_DIRECTIONS.DESCENDING : SORT_DIRECTIONS.ASCENDING, age: SORT_DIRECTIONS.NULL, elo: SORT_DIRECTIONS.NULL, distance: SORT_DIRECTIONS.NULL }))
                 break
             default:
                 break
@@ -94,23 +106,23 @@ const SortProfilesComponent = ({ profiles, setProfiles }: SortProfilesComponentP
                         </div>
                         <div style={{ width: "300px" }} className="d-flex flex-column">
                             <ButtonGroup size="medium" className="mb-2 w-100">
-                                <Button key="age" className="w-100 align-items-center" onClick={() => sortProfiles(SortCategoryEnum.AGE)}>
+                                <Button key="age" className="w-100 align-items-center" onClick={() => sortProfiles(SORT_CATEGORIES.AGE)}>
                                     <p className="m-0 me-1 mt-1">Age</p>
-                                    {sortParams.age === SortEnum.ASCENDING ? <NorthEastIcon color="primary" /> : sortParams.age === SortEnum.DESCENDING ? <SouthEastIcon color="primary" /> : <SwapVertIcon color="primary" />}
+                                    {renderSortIcon(sortParams.age)}
                                 </Button>
-                                <Button key="commonTags" className="w-100" onClick={() => sortProfiles(SortCategoryEnum.COMMONTAGS)}>
+                                <Button key="commonTags" className="w-100" onClick={() => sortProfiles(SORT_CATEGORIES.COMMONTAGS)}>
                                     <p className="m-0 me-1 mt-1">Common tags</p>
-                                    {sortParams.commonTags === SortEnum.ASCENDING ? <NorthEastIcon color="primary" /> : sortParams.commonTags === SortEnum.DESCENDING ? <SouthEastIcon color="primary" /> : <SwapVertIcon color="primary" />}
+                                    {renderSortIcon(sortParams.commonTags)}
                                 </Button>
                             </ButtonGroup>
                             <ButtonGroup size="medium" className="mb-2 w-100">
-                                <Button key="location" className="w-100" onClick={() => sortProfiles(SortCategoryEnum.DISTANCE)}>
+                                <Button key="location" className="w-100" onClick={() => sortProfiles(SORT_CATEGORIES.DISTANCE)}>
                                     <p className="m-0 me-1 mt-1">Distance</p>
-                                    {sortParams.distance === SortEnum.ASCENDING ? <NorthEastIcon color="primary" /> : sortParams.distance === SortEnum.DESCENDING ? <SouthEastIcon color="primary" /> : <SwapVertIcon color="primary" />}
+                                    {renderSortIcon(sortParams.distance)}
                                 </Button>
-                                <Button key="elo" className="w-100" onClick={() => sortProfiles(SortCategoryEnum.ELO)}>
+                                <Button key="elo" className="w-100" onClick={() => sortProfiles(SORT_CATEGORIES.ELO)}>
                                     <p className="m-0 me-1 mt-1">Fame rating</p>
-                                    {sortParams.elo === SortEnum.ASCENDING ? <NorthEastIcon color="primary" /> : sortParams.elo === SortEnum.DESCENDING ? <SouthEastIcon color="primary" /> : <SwapVertIcon color="primary" />}
+                                    {renderSortIcon(sortParams.elo)}
                                 </Button>
                             </ButtonGroup>
                         </div>
