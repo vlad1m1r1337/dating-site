@@ -1,4 +1,4 @@
-import { CircularProgress, Grid, Typography } from '@mui/material'
+import { Grid, Typography } from '@mui/material'
 import goose from '../../../assets/goose.jpg'
 import { ProfilesModel } from '../models/ProfilesModel'
 
@@ -20,30 +20,27 @@ const SearchProfileGrid = ({ profiles, setProfileId }: SearchProfileGridProps) =
         return null
     }
 
+    const hasSingleProfile = profiles.length === 1
+    const profileGridSize = hasSingleProfile ? { xs: 12, sm: 8, md: 6 } : { xs: 6, sm: 4, md: 3 }
+
     return (
         <div className="profileList">
-            <Grid container spacing={2} className="flex-wrap p-0">
+            <Grid container spacing={2} className="flex-wrap p-0" justifyContent={hasSingleProfile ? 'center' : 'flex-start'}>
                 {profiles.map((user) => (
-                    <Grid item xs={6} sm={4} className="mt-3 imgMosaicContainer position-relative" key={user.id} height="177px">
-                        {user.image ? (
-                            <>
-                                <img
-                                    src={getProfileImageSrc(user.image)}
-                                    alt="user"
-                                    className="imgMosaic"
-                                    style={{ position: 'absolute', top: 0, borderRadius: '6px 6px 0 0' }}
-                                    onClick={() => setProfileId(user.id)}
-                                    onError={(event) => { event.currentTarget.src = goose }}
-                                    loading="lazy"
-                                />
-                                <div className="imgMosaicOverlay">
-                                    <Typography noWrap variant="h6" className="text-white">{user.firstName}</Typography>
-                                    <Typography variant="subtitle1" className="text-white">{user.age}</Typography>
-                                </div>
-                            </>
-                        ) : (
-                            <CircularProgress color="secondary" />
-                        )}
+                    <Grid item {...profileGridSize} className="mt-3" key={user.id}>
+                        <button type="button" className="imgMosaicContainer" onClick={() => setProfileId(user.id)}>
+                            <img
+                                src={getProfileImageSrc(user.image)}
+                                alt={`${user.firstName} profile`}
+                                className="imgMosaic"
+                                onError={(event) => { event.currentTarget.src = goose }}
+                                loading="lazy"
+                            />
+                            <div className="imgMosaicOverlay">
+                                <Typography noWrap variant="h6" className="imgMosaicOverlayText text-white">{user.firstName}</Typography>
+                                <Typography variant="subtitle1" className="imgMosaicOverlayText text-white">{user.age}</Typography>
+                            </div>
+                        </button>
                     </Grid>
                 ))}
             </Grid>
