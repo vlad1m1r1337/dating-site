@@ -1,0 +1,196 @@
+---
+globs:
+  - client/src/**/*.tsx
+alwaysApply: false
+description: React 18 component and hooks conventions
+---
+
+- when: "creating or editing React components"
+  instructions: |
+    ## Purity
+    - Components must be pure during render: no API calls, subscriptions, timers, or direct DOM access in the component body.
+    - Do not mutate props, state, or objects created outside the component during render.
+
+    ```tsx
+    // ❌ side effect during render
+    const Chat = () => {
+      const socket = new WebSocket(url)
+      socket.onmessage = (event) => setMessages(JSON.parse(event.data))
+      return <div />
+    }
+
+    // ✅ subscription in useEffect with cleanup
+    const Chat = () => {
+      useEffect(() => {
+        const socket = new WebSocket(url)
+        socket.onmessage = (event) => { /* update state */ }
+        return () => socket.close()
+      }, [])
+      return <div />
+    }
+    ```
+
+    ## Hooks
+    - Call hooks only at the top level of a component or custom hook — never inside conditions, loops, or nested functions.
+    - Custom hooks must start with `use` (see variables.mdc for naming).
+
+    ```tsx
+    // ❌ conditional hook
+    if (isLoggedIn) {
+      const [user, setUser] = useState(null)
+    }
+
+    // ✅ hooks at top level; branch inside hook body or in JSX
+    const [user, setUser] = useState<User | null>(null)
+    ```
+
+    ## Effects
+    - Fetch on mount, WebSocket/listeners, timers → `useEffect` with a cleanup function.
+    - User clicks, form submit, button press → event handlers (`handleSubmit`, `handleClick`), not `useEffect`.
+    - List every reactive value used inside the effect in the dependency array (`props`, `state`, values from props).
+
+    ```tsx
+    // ❌ empty deps but uses wantedTags from state
+    useEffect(() => {
+      fetchProfiles(wantedTags)
+    }, [])
+
+    // ✅ include reactive dependencies
+    useEffect(() => {
+      fetchProfiles(wantedTags)
+    }, [wantedTags])
+
+    // ❌ useEffect for button click
+    useEffect(() => {
+      if (shouldSubmit) submitForm()
+    }, [shouldSubmit])
+
+    // ✅ handler
+    const handleFormSubmit = () => {
+      submitForm()
+    }
+    ```
+
+    ```tsx
+    // ❌ WebSocket in useMemo (no cleanup on unmount)
+    const socketChat = useMemo(() => new WebSocket(url), [])
+
+    // ✅ create and close in useEffect
+    useEffect(() => {
+      const socket = new WebSocket(url)
+      return () => socket.close()
+    }, [])
+    ```
+
+    ## State
+    - Update state immutably: new object/array, never mutate in place.
+    - Do not store values that can be derived from existing state or props.
+    - State shared by sibling components lives in the nearest common parent and is passed via props.
+    - In one component, keep at most **4** `useState` calls. If you need more, group related fields into one object (`useState<FormState>({ ... })`), switch to `useReducer`, extract a custom hook, or create a new component.
+
+    ```tsx
+    // ❌ mutate array in state
+    messages.push(newMessage)
+    setMessages(messages)
+
+    // ✅ new array
+    setMessages((prev) => [...prev, newMessage])
+
+    // ❌ redundant state
+    const [profiles, setProfiles] = useState<Profile[]>([])
+    const [profileCount, setProfileCount] = useState(0)
+
+    // ✅ derive during render
+    const profileCount = profiles.length
+    ```
+
+    ```tsx
+    // ❌ too many independent useState hooks in one component
+    const [name, setName] = useState('')
+    const [email, setEmail] = useState('')
+    const [password, setPassword] = useState('')
+    const [confirmPassword, setConfirmPassword] = useState('')
+    const [isSubmitting, setIsSubmitting] = useState(false)
+
+    // ✅ one object for related form fields
+    const [form, setForm] = useState({ name: '', email: '', password: '', confirmPassword: '' })
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    ```
+
+    ```tsx
+    // ✅ lift alerts/status to parent (pattern used in Search, Home)
+    interface SearchProps {
+      setSuccessAlert: (message: string) => void
+      setErrorAlert: (message: string) => void
+      statusList: StatusListModel
+    }
+    ```
+
+    ## UI
+    - Inputs and text fields: controlled with `value` + `onChange` and local state. Avoid `document.getElementById` for form values.
+    - Lists: `key` from stable entity id (`profile.id`, `message.id`). Avoid `key={index}` when items can be reordered, inserted, or removed.
+
+    ```tsx
+    // ❌ uncontrolled via DOM
+    const postMessage = () => {
+      const text = (document.getElementById('newMessage') as HTMLInputElement).value
+      instance.post('/chat/message', { content: text })
+    }
+
+    // ✅ controlled input
+    const [messageText, setMessageText] = useState('')
+    const handleSendMessage = () => {
+      instance.post('/chat/message', { content: messageText })
+      setMessageText('')
+    }
+    <TextField value={messageText} onChange={(e) => setMessageText(e.target.value)} />
+    ```
+
+    ```tsx
+    // ❌ index key for dynamic list
+    {messages.map((message, index) => (
+      <Box key={index}>{message.content}</Box>
+    ))}
+
+    // ✅ stable id from data
+    {messages.map((message) => (
+      <Box key={message.id}>{message.content}</Box>
+    ))}
+    ```
+
+    ## Extraction
+    - If the same `useState` + `useEffect` + API pattern appears in multiple components, extract a custom hook.
+
+    ```tsx
+    // ✅ reusable hook
+    const useProfiles = (filterParams: FilterParams) => {
+      const [profiles, setProfiles] = useState<ProfilesModel[]>([])
+      const [areProfilesLoading, setAreProfilesLoading] = useState(true)
+
+      useEffect(() => {
+        const loadProfiles = async () => {
+          setAreProfilesLoading(true)
+          try {
+            const res = await instance.post('/profiles/queries', filterParams)
+            setProfiles(res.data.profiles)
+          } finally {
+            setAreProfilesLoading(false)
+          }
+        }
+        loadProfiles()
+      }, [filterParams])
+
+      return { profiles, areProfilesLoading }
+    }
+    ```
+
+    ## Component structure
+    - One main component per file; props typed with a dedicated interface (`SearchProps`, `ChatProps`).
+    - Prefer function components; keep JSX readable — extract sub-blocks into small local components or separate files when a file grows large.
+    - A `.tsx` file must not exceed **200 lines** (excluding blank lines and comments). Split UI into subcomponents, move logic into custom hooks (`useChat.ts`), and move types/constants into sibling files.
+
+    ```tsx
+    // ❌ 350-line Search.tsx with filters, list, and modals in one file
+
+    // ✅ Search.tsx (~120 lines) + SearchFilters.tsx + useSearchProfiles.ts
+    ```

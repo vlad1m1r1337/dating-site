@@ -15,6 +15,7 @@ import L, { LatLngExpression } from "leaflet"
 import LocationOnIcon from '@mui/icons-material/LocationOn';
 import LocationSearchingIcon from '@mui/icons-material/LocationSearching';
 import 'leaflet/dist/leaflet.css';
+import { humanizeApiError } from "../utils/apiErrorUtils"
 
 interface ProfilePageProps {
     setErrorAlert: (message: string) => void
@@ -31,6 +32,8 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
     const tagsError = !Object.entries(form.tags).filter(([, value]) => value).length
     const imagesError = !form.images.length
     const geolocError = !form.geoloc.length || form.geoloc.split(',').length !== 2 || form.geoloc === "0,0"
+    const genderError = !form.gender.length
+    const orientationError = !form.orientation.length
 
     const [isPageLoading, setIsPageLoading] = useState(true)
     const [imgAreLoading, setImgAreLoading] = useState<number[]>([])
@@ -119,7 +122,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                 return
             }
 
-            setErrorAlert(error?.response?.data?.message || 'Could not load profile')
+            setErrorAlert(humanizeApiError(error?.response?.data?.message || 'Could not load profile'))
             setIsPageLoading(false)
         })
     }
@@ -140,12 +143,16 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
 
     const handleSubmit = async () => {
         setShowRequiredErrors(true)
-        if (imagesError || geolocError) {
-            const missingFields = [
-                imagesError ? "at least one photo" : null,
-                geolocError ? "your location" : null,
-            ].filter(Boolean).join(" and ")
-            setErrorAlert(`Please add ${missingFields}`)
+        if (imagesError || geolocError || genderError || orientationError) {
+            const missingActions = [
+                imagesError ? "add at least one photo" : null,
+                geolocError ? "set your location" : null,
+                genderError ? "select your gender" : null,
+                orientationError ? "select your orientation" : null,
+            ].filter(Boolean)
+            const last = missingActions.pop()
+            const prefix = missingActions.length ? `${missingActions.join(", ")} and ` : ""
+            setErrorAlert(`Please ${prefix}${last}`)
             return
         }
         setIsSubmitting(true)
@@ -158,7 +165,7 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
             setSuccessAlert("Profile updated")
             getUser()
         }).catch((err) => {
-            setErrorAlert(err.response.data.message)
+            setErrorAlert(humanizeApiError(err.response?.data?.message || 'Could not update profile'))
         }).finally(() => {
             setIsSubmitting(false)
         })
@@ -298,6 +305,10 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                             <MenuItem value={"female"}>Female</MenuItem>
                                         </Select>
                                     </FormControl>
+                                    {showRequiredErrors && genderError &&
+                                        <Typography color="error" variant="caption" display="block" mt={1}>
+                                            Please select your gender
+                                        </Typography>}
                                 </Box>
                                 <Box sx={{ flex: 5 }}>
                                     <FormControl sx={{ width: "100%" }}>
@@ -317,6 +328,10 @@ const ProfilePage = ({ setErrorAlert, setSuccessAlert }: ProfilePageProps) => {
                                             <MenuItem value={"bisexual"}>Bisexual</MenuItem>
                                         </Select>
                                     </FormControl>
+                                    {showRequiredErrors && orientationError &&
+                                        <Typography color="error" variant="caption" display="block" mt={1}>
+                                            Please select your orientation
+                                        </Typography>}
                                 </Box>
                                 <Box sx={{ flex: 2 }}>
                                     <FormControl>

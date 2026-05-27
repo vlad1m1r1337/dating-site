@@ -157,7 +157,7 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
                         :
                         likes && likes.length ?
                             <>
-                                <Typography alignContent="start" variant="h6" fontWeight="bold">{likesOrViews === "likes" ? "LIKES" : "VIEWS"}</Typography>
+                                {/* <Typography alignContent="start" variant="h6" fontWeight="bold">{likesOrViews === "likes" ? "LIKES" : "VIEWS"}</Typography> */}
                                 <List className="likeList">
                                     {likes.map((like: LikeModel, index: number) => {
                                         return (
@@ -179,7 +179,7 @@ const LikeList = ({ setSuccessAlert, likesOrViews, refresh, statusList }: LikeLi
                             </>
                             :
                             <div className="skeletonHeight display-flex flex-column position-relative">
-                                <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">{likesOrViews === "likes" ? "LIKES" : "VIEWS"}</Typography>
+                                {/* <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">{likesOrViews === "likes" ? "LIKES" : "VIEWS"}</Typography> */}
                                 <AvatarPlaceholder className="w-100" />
                             </div>
             }

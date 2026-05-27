@@ -1,0 +1,41 @@
+---
+globs:
+  - web-app/src/**/*.ts
+  - web-app/src/**/*.tsx
+description: Prevent deeply nested conditional expressions
+alwaysApply: true
+---
+
+# Conditional Expressions
+
+- Avoid deeply nested ternary operators.
+- Do not nest more than one ternary expression.
+- Prefer readability over compact syntax.
+- Use:
+  - early returns
+  - extracted variables
+  - helper functions
+  - switch statements
+  - mapping objects
+
+## Bad
+
+```tsx
+const label = isLoading
+  ? 'Loading'
+  : hasError
+    ? 'Error'
+    : isEmpty
+      ? 'Empty'
+      : 'Ready';
+```
+
+## Good
+
+```tsx
+if (isLoading) return 'Loading';
+if (hasError) return 'Error';
+if (isEmpty) return 'Empty';
+
+return 'Ready';
+```

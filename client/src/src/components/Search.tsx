@@ -19,7 +19,6 @@ interface SearchProps {
 }
 
 const Search = ({ setSuccessAlert, setErrorAlert, statusList }: SearchProps) => {
-    // return;
     const [isFiltersModalOpened, setIsFiltersModalOpened] = useState(false)
     const [ageSliderValue, setAgeSliderValue] = useState<number[]>([18, 99])
     const [eloSliderValue, setEloSliderValue] = useState<number[]>([20, 1000])

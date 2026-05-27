@@ -199,7 +199,7 @@ const Chat = ({ statusList }: ChatProps) => {
                 :
                 data && data.rooms.length ?
                     <>
-                        <Typography variant="h6" fontWeight="bold">CHATS</Typography>
+                        {/* <Typography variant="h6" fontWeight="bold">CHATS</Typography> */}
                         <List className="chatList">
                             {data.rooms.map((room: ChatRoom, index: number) => {
                                 return (
@@ -233,7 +233,7 @@ const Chat = ({ statusList }: ChatProps) => {
                     </>
                     :
                     <div className="skeletonHeight display-flex flex-column position-relative">
-                        <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">CHATS</Typography>
+                        {/* <Typography className="position-absolute top-0" variant="h6" fontWeight="bold">CHATS</Typography> */}
                         <AvatarPlaceholder className="w-100" />
                     </div>
             }
