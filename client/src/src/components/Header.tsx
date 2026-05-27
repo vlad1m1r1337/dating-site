@@ -17,7 +17,7 @@ interface HeaderProps {
 const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) => {
     const navigate = useNavigate()
     const location = useLocation()
-    const [confetti, setConfetti] = useState(false)
+    const [isConfettiVisible, setIsConfettiVisible] = useState(false)
 
     useEffect(() => {
         if (!localStorage.getItem("token")) return
@@ -29,8 +29,8 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
             const data = JSON.parse(event.data)
             setSuccessAlert(data.message)
             if (data.message.includes("Match with ")) {
-                setConfetti(true)
-                setTimeout(() => setConfetti(false), 5000)
+                setIsConfettiVisible(true)
+                setTimeout(() => setIsConfettiVisible(false), 5000)
             }
         }
 
@@ -42,7 +42,7 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
             socketNotifications?.close()
             socketStatus?.close()
         }
-    }, [navigate])
+    }, [setStatusList, setSuccessAlert])
 
     const handleLogout = async () => {
         await instance.post('/user/logout').then(() => {
@@ -53,11 +53,11 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
         })
     }
 
-    const showNav = location.pathname === '/' || location.pathname === '/profile'
+    const shouldShowNav = location.pathname === '/' || location.pathname === '/profile'
 
     return (
         <>
-            {confetti && <Confetti width={window.innerWidth} height={window.innerHeight} numberOfPieces={1000} recycle={false} />}
+            {isConfettiVisible && <Confetti width={window.innerWidth} height={window.innerHeight} numberOfPieces={1000} recycle={false} />}
             <AppBar position="static" sx={{ background: '#1a1a1a', boxShadow: 'none', borderBottom: '1px solid #2a2a2a' }}>
                 <Toolbar sx={{ justifyContent: 'space-between' }}>
                     <Box display="flex" alignItems="center" sx={{ cursor: 'pointer' }} onClick={() => navigate('/')}>
@@ -66,7 +66,7 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
                             Matcha
                         </Typography>
                     </Box>
-                    {showNav && (
+                    {shouldShowNav && (
                         <Box>
                             <IconButton onClick={() => navigate('/profile')} color="inherit">
                                 <AccountCircleIcon />

@@ -1,0 +1,129 @@
+---
+globs:
+  - client/src/**/*.ts
+  - client/src/**/*.tsx
+alwaysApply: false
+description: Rules for naming the variables
+---
+
+  - when: "creating or editing variables, enums, functions, or types"
+    instructions: |
+      ## 🎯 General Naming Principles
+      1. Use **clear, descriptive, and consistent** names. Avoid abbreviations unless universally recognized (e.g., `id`, `url`, `api`).
+      2. Prefer English names even for internal or local variables.
+      3. Avoid redundant prefixes/suffixes (`dataObject`, `infoList`, etc.) — name should reflect the content or role precisely.
+      4. Use singular form for single entities and plural for arrays, lists, or enums.
+      5. Do not use Hungarian notation (`strUserName`, `numCount`, etc.).
+
+      ## 🧱 Variables
+      - Use **camelCase** for all variable names.
+      - Example:
+        ```ts
+        const userName = 'John';
+        const activeUsers = ['John', 'Jane'];
+        ```
+      - Boolean variables should start with an auxiliary verb such as `is`, `has`, `can`, or `should`.
+        ```ts
+        const isLoading = true;
+        const hasError = false;
+        const shouldRender = true;
+        ```
+
+      ## 🚀 Functions
+      - Function names must **start with a verb** to indicate an action.
+      - Use **camelCase**.
+      - Prefer expressive verbs: `get`, `set`, `update`, `fetch`, `create`, `handle`, `calculate`, `render`, `build`, `transform`.
+      - Example:
+        ```ts
+        function getUserData() {}
+        const handleButtonClick = () => {};
+        ```
+      - Async functions should clearly reflect asynchronous behavior:
+        ```ts
+        async function fetchUserProfile() {}
+        ```
+      - Event handlers should use `handle<EventName>` pattern:
+        ```ts
+        const handleFormSubmit = () => {};
+        ```
+      - Functions returning boolean should start with `is`, `has`, `can`, or `should`.
+
+      ## 🔢 Enums and Constants
+      - Enums and constant objects should be named in **SCREAMING_SNAKE_CASE** and **plural form**.
+      - Example:
+        ```ts
+        export const USER_STATUSES = {
+          ACTIVE: 'active',
+          INACTIVE: 'inactive',
+        } as const;
+        ```
+      - Use `as const` for literal-based enums to preserve value types.
+      - Avoid enum duplication with backend values — keep enums strictly for frontend logic.
+      - When defining enum-like objects used across multiple components, store them in `src/constants/` or `src/shared/constants/`.
+
+      ## 🧩 Types and Interfaces
+      - TypeScript types and interfaces should:
+        - Start with a **capital letter**.
+        - Use **PascalCase**.
+      - Examples:
+        ```ts
+        type UserStatus = Values<typeof USER_STATUSES>;
+        interface UserProfile {
+          id: string;
+          name: string;
+        }
+        ```
+      - Use `type` for data shapes and transformations, `interface` for structures extended or implemented by classes or components:
+        ```ts
+        type UserPayload = {
+          id: string;
+        };
+
+        interface ButtonProps {
+          onClick: () => void;
+        }
+        ```
+      - Avoid prefixing types with `I` (e.g., `IUser` ❌).
+      - Derived types from Enums must use the `Values` generic utility:
+        ```ts
+        import type { Values } from 'web-app/src/utils/types';
+        type UserStatus = Values<typeof USER_STATUSES>;
+        ```
+
+      ## 🗂 Naming by Context
+      - **React Components**: Always **PascalCase**.
+        ```ts
+        const UserCard = () => <div />;
+        ```
+      - **Hooks**: Must start with `use`.
+        ```ts
+        const useUserData = () => {};
+        ```
+      - **Redux slices & actions**:
+        - Slice name: singular, lowercase, e.g. `userSlice`.
+        - Action creators: verbs in camelCase, e.g. `updateUser`, `setUserStatus`.
+      - **Files and folders**:
+        - Use **kebab-case** for filenames: `user-profile.tsx`, `user-card.test.ts`.
+        - Do not mix cases inside file names.
+
+      ## 🧰 Additional Guidelines
+      - Avoid naming collisions between local variables and imported types.
+      - Prefer explicit names over contextual shorthand (use `totalPrice` instead of just `price` when multiple prices exist).
+      - Use consistent naming within related modules — if one slice uses `selectedId`, all others should follow the same pattern.
+      - Never reuse the same variable name for different purposes within the same scope.
+
+  - when: "Cursor generates new functions or constants"
+    instructions: |
+      - Generate function names starting with verbs.
+      - Use SCREAMING_SNAKE_CASE (plural) for enums and constant maps.
+      - Use PascalCase for TS types and interfaces.
+      - When returning enum values, suggest using `Values<typeof ENUM_NAME>` type reference.
+      - Ensure boolean-returning functions or flags start with `is`, `has`, `can`, or `should`.
+
+  - when: "Cursor detects inconsistent naming"
+    instructions: |
+      - Suggest renaming to match the conventions above.
+      - Warn when enums are not in SCREAMING_SNAKE_CASE.
+      - Warn when function name does not start with a verb.
+      - Warn when a type name is not PascalCase.
+      - Suggest using `Values<typeof ENUM>` when a type is inferred from enum values.

@@ -14,11 +14,11 @@ interface RegisterPageProps {
 const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => {
     const [form, setForm] = useState<RegisterForm>({ firstName: '', lastName: '', username: '', password: '', email: '' })
     const [isLoading, setIsLoading] = useState(false)
-    const emailError = !!form.email.length && (validator.isEmail(form.email) ? false : true)
-    const passwordError = !!form.password.length && !(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,30}$/).test(form.password)
-    const usernameError = !!form.username.length && !(/^[a-zA-Z0-9]{3,16}$/).test(form.username)
-    const firstnameError = !!form.firstName.length && !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.firstName)
-    const lastnameError = !!form.lastName.length && !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.lastName)
+    const hasEmailError = !!form.email.length && !validator.isEmail(form.email)
+    const hasPasswordError = !!form.password.length && !(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,30}$/).test(form.password)
+    const hasUsernameError = !!form.username.length && !(/^[a-zA-Z0-9]{3,16}$/).test(form.username)
+    const hasFirstNameError = !!form.firstName.length && !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.firstName)
+    const hasLastNameError = !!form.lastName.length && !(/^[a-zA-Z\u00C0-\u00FF]{3,16}$/).test(form.lastName)
 
     const navigate = useNavigate()
 
@@ -63,7 +63,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                     <div className="row justify-content-center ">
                         <div className="col-12">
                             <TextField
-                                error={firstnameError}
+                                error={hasFirstNameError}
                                 value={form.firstName}
                                 disabled={isLoading}
                                 onChange={handleFieldChange}
@@ -71,7 +71,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 required
                                 id="firstName"
                                 label="First name"
-                                helperText={firstnameError ? 'Firstname must be between 3 and 16 characters long and contain only letters' : ''}
+                                helperText={hasFirstNameError ? 'Firstname must be between 3 and 16 characters long and contain only letters' : ''}
                                 variant="outlined"
                                 color="primary"
                                 inputProps={{ style: { color: 'white' }, maxLength: 16 }}
@@ -81,7 +81,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                     <div className="row justify-content-center pt-3">
                         <div className="col-12">
                             <TextField
-                                error={lastnameError}
+                                error={hasLastNameError}
                                 value={form.lastName}
                                 disabled={isLoading}
                                 onChange={handleFieldChange}
@@ -89,7 +89,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 required
                                 id="lastName"
                                 label="Last name"
-                                helperText={lastnameError ? 'Last name must be between 3 and 16 characters long and contain only letters' : ''}
+                                helperText={hasLastNameError ? 'Last name must be between 3 and 16 characters long and contain only letters' : ''}
                                 variant="outlined"
                                 color="primary"
                                 inputProps={{ style: { color: 'white' }, maxLength: 16 }}
@@ -99,7 +99,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                     <div className="row justify-content-center pt-3">
                         <div className="col-12">
                             <TextField
-                                error={usernameError}
+                                error={hasUsernameError}
                                 value={form.username}
                                 disabled={isLoading}
                                 onChange={handleFieldChange}
@@ -107,7 +107,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 required
                                 id="username"
                                 label="Username"
-                                helperText={usernameError ? 'Username must be between 3 and 16 characters long and contain only letters and numbers' : ''}
+                                helperText={hasUsernameError ? 'Username must be between 3 and 16 characters long and contain only letters and numbers' : ''}
                                 variant="outlined"
                                 color="primary"
                                 inputProps={{ style: { color: 'white' }, maxLength: 16 }}
@@ -117,7 +117,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                     <div className="row justify-content-center pt-3">
                         <div className="col-12">
                             <TextField
-                                error={emailError}
+                                error={hasEmailError}
                                 value={form.email}
                                 disabled={isLoading}
                                 onChange={handleFieldChange}
@@ -125,7 +125,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 required
                                 id="email"
                                 label="Email"
-                                helperText={emailError ? 'Invalid email' : ''}
+                                helperText={hasEmailError ? 'Invalid email' : ''}
                                 variant="outlined"
                                 color="primary"
                                 inputProps={{ style: { color: 'white' }, maxLength: 320 }}
@@ -135,7 +135,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                     <div className="row justify-content-center pt-3">
                         <div className="col-12">
                             <TextField
-                                error={passwordError}
+                                error={hasPasswordError}
                                 value={form.password}
                                 disabled={isLoading}
                                 onChange={handleFieldChange}
@@ -145,7 +145,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 autoComplete="current-password"
                                 id="password"
                                 label="Password"
-                                helperText={passwordError ? 'Invalid password , must contain beween 8 and 30 characters, 1 uppercase letter, lowercase letter, number and special character' : ''}
+                                helperText={hasPasswordError ? 'Invalid password , must contain beween 8 and 30 characters, 1 uppercase letter, lowercase letter, number and special character' : ''}
                                 variant="outlined"
                                 color="primary"
                                 onKeyDown={e => {
@@ -163,7 +163,7 @@ const RegisterPage = ({ setErrorAlert, setSuccessAlert }: RegisterPageProps) => 
                                 variant="contained"
                                 color="primary"
                                 className="w-100"
-                                disabled={emailError || passwordError || usernameError || firstnameError || lastnameError || !form.email.length || !form.password.length || !form.username.length || !form.firstName.length || !form.lastName.length}
+                                disabled={hasEmailError || hasPasswordError || hasUsernameError || hasFirstNameError || hasLastNameError || !form.email.length || !form.password.length || !form.username.length || !form.firstName.length || !form.lastName.length}
                                 loading={isLoading}
                                 size="large"
                                 onClick={() => handleSubmit()}

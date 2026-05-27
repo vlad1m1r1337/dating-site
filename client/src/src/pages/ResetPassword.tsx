@@ -15,8 +15,8 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
     const [isLoading, setIsLoading] = useState(false)
     const [email, setEmail] = useState<string>("")
     const [password, setPassword] = useState<string>("")
-    const emailError = !!email.length && (validator.isEmail(email) ? false : true)
-    const passwordError = !!password.length && !(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,30}$/).test(password)
+    const hasEmailError = !!email.length && !validator.isEmail(email)
+    const hasPasswordError = !!password.length && !(/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$ %^&*-]).{8,30}$/).test(password)
 
     const navigate = useNavigate()
 
@@ -73,7 +73,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                             <div className="row justify-content-center pt-3">
                                 <div className="col-12">
                                     <TextField
-                                        error={passwordError}
+                                        error={hasPasswordError}
                                         value={password}
                                         disabled={isLoading}
                                         onChange={(e) => setPassword(e.target.value)}
@@ -83,7 +83,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                         autoComplete="new-password"
                                         id="password"
                                         label="Password"
-                                        helperText={passwordError ? 'Invalid password , must contain beween 8 and 30 characters, 1 uppercase letter, lowercase letter, number and special character' : ''}
+                                        helperText={hasPasswordError ? 'Invalid password , must contain beween 8 and 30 characters, 1 uppercase letter, lowercase letter, number and special character' : ''}
                                         variant="outlined"
                                         color="primary"
                                         onKeyDown={e => {
@@ -102,7 +102,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                         variant="contained"
                                         color="primary"
                                         className="w-100"
-                                        disabled={passwordError || !password.length}
+                                        disabled={hasPasswordError || !password.length}
                                         loading={isLoading}
                                         size="large"
                                         onClick={() => handleReset()}
@@ -117,7 +117,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                             <div className="row justify-content-center pt-3">
                                 <div className="col-12">
                                     <TextField
-                                        error={emailError}
+                                        error={hasEmailError}
                                         value={email}
                                         disabled={isLoading}
                                         onChange={(e) => setEmail(e.target.value)}
@@ -125,7 +125,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                         required
                                         id="email"
                                         label="Email"
-                                        helperText={emailError ? 'Invalid email' : ''}
+                                        helperText={hasEmailError ? 'Invalid email' : ''}
                                         variant="outlined"
                                         color="primary"
                                         sx={{ "& .MuiInputBase-input": { color: "#ffffff" } }}
@@ -139,7 +139,7 @@ const ResetPasswordPage = ({ setErrorAlert, setSuccessAlert }: ResetPasswordPage
                                         variant="contained"
                                         color="primary"
                                         className="w-100"
-                                        disabled={emailError || !email.length}
+                                        disabled={hasEmailError || !email.length}
                                         loading={isLoading}
                                         size="large"
                                         onClick={() => handleResetRequest()}
