@@ -44,7 +44,6 @@ const HomePage = ({ setErrorAlert, setSuccessAlert, statusList }: HomePageProps)
             navigate('/login')
         }
     }, [navigate])
-
     return (
         <div className="homePage container">
             {isPageLoading ? <CircularProgress color="secondary" /> :

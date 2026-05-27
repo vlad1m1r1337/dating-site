@@ -28,22 +28,22 @@ const BrowsingFiltersModal = ({
 }: BrowsingFiltersModalProps) => {
     return (
         <Modal open={isOpen} onClose={closeFilters}>
-            <div className="row justify-content-center p-0 p-2 filtersModal">
-                <Card className="col-xs-12 col-sm-12 col-md-10 col-lg-8 col-xl-6 col-xxl-5 pt-3 d-flex w-100 flex-column" elevation={6}>
+            <div className="filtersModal">
+                <Card className="searchFiltersCard pt-3 d-flex flex-column" elevation={6}>
                     <div className="d-flex justify-content-end align-items-center w-100">
                         <Button className="mb-4 min-width-0" style={{ minWidth: 0 }} onClick={closeFilters}>
                             <CloseIcon color="primary" />
                         </Button>
                     </div>
-                    <div className="d-flex align-items-center w-100">
-                        <Typography id="age-slider" style={{ marginLeft: '24px', marginRight: '24px' }}>
+                    <div className="filterSliderRow">
+                        <Typography id="age-slider" className="filterSliderLabel">
                             Age range
                         </Typography>
                         <Slider
                             getAriaLabel={() => 'Age range'}
                             min={18}
                             max={99}
-                            style={{ width: '210px', margin: '24px' }}
+                            className="filterSlider"
                             value={ageRange}
                             onChange={(_, newValue) => {
                                 if (typeof newValue === 'number') {
@@ -55,8 +55,8 @@ const BrowsingFiltersModal = ({
                             aria-labelledby="age-slider"
                         />
                     </div>
-                    <div className="d-flex align-items-center w-100">
-                        <Typography id="elo-slider" style={{ marginLeft: '24px', marginRight: '24px' }}>
+                    <div className="filterSliderRow">
+                        <Typography id="elo-slider" className="filterSliderLabel">
                             Elo range
                         </Typography>
                         <Slider
@@ -64,7 +64,7 @@ const BrowsingFiltersModal = ({
                             min={0}
                             max={1000}
                             step={10}
-                            style={{ width: '210px', margin: '24px' }}
+                            className="filterSlider"
                             value={eloRange}
                             onChange={(_, newValue) => {
                                 if (typeof newValue === 'number') {
@@ -76,15 +76,15 @@ const BrowsingFiltersModal = ({
                             aria-labelledby="elo-slider"
                         />
                     </div>
-                    <div className="d-flex align-items-center w-100">
-                        <Typography id="distance-slider" style={{ marginLeft: '24px', marginRight: '24px' }}>
+                    <div className="filterSliderRow">
+                        <Typography id="distance-slider" className="filterSliderLabel">
                             Distance max
                         </Typography>
                         <Slider
                             getAriaLabel={() => 'Distance max'}
                             min={1}
                             max={200}
-                            style={{ width: '210px', margin: '24px' }}
+                            className="filterSlider"
                             valueLabelDisplay="on"
                             aria-labelledby="distance-slider"
                             value={distance}
@@ -96,15 +96,15 @@ const BrowsingFiltersModal = ({
                             }}
                         />
                     </div>
-                    <div className="d-flex align-items-center justify-content-center w-100">
-                        <Typography id="min-tags-slider" style={{ margin: '24px' }}>
+                    <div className="filterSliderRow">
+                        <Typography id="min-tags-slider" className="filterSliderLabel">
                             Minimum common tags
                         </Typography>
                         <Slider
                             getAriaLabel={() => 'Minimum common tags'}
                             min={0}
                             max={20}
-                            style={{ minWidth: '190px', margin: '24px' }}
+                            className="filterSlider"
                             valueLabelDisplay="on"
                             aria-labelledby="min-tags-slider"
                             value={minTags}
