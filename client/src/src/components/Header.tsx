@@ -20,29 +20,62 @@ const Header = ({ setErrorAlert, setSuccessAlert, setStatusList }: HeaderProps) 
     const [isConfettiVisible, setIsConfettiVisible] = useState(false)
 
     useEffect(() => {
-        if (!localStorage.getItem("token")) return
+        const token = localStorage.getItem("token")
+        if (!token) {
+            setStatusList({ count: 0, users: [] })
+            return
+        }
 
-        const socketNotifications = new WebSocket(import.meta.env.VITE_WS_API + "/notifications?token=" + localStorage.getItem("token")!)
-        const socketStatus = new WebSocket(import.meta.env.VITE_WS_API + "/status?token=" + localStorage.getItem("token")!)
+        let shouldCloseSockets = false
+        let socketNotifications: WebSocket | undefined
+        let socketStatus: WebSocket | undefined
 
-        socketNotifications.onmessage = (event) => {
-            const data = JSON.parse(event.data)
-            setSuccessAlert(data.message)
-            if (data.message.includes("Match with ")) {
-                setIsConfettiVisible(true)
-                setTimeout(() => setIsConfettiVisible(false), 5000)
+        const handleInvalidSession = () => {
+            localStorage.removeItem("token")
+            setStatusList({ count: 0, users: [] })
+
+            const shouldRedirectToLogin = location.pathname === '/' || location.pathname === '/profile'
+            if (shouldRedirectToLogin) {
+                navigate('/login')
             }
         }
 
-        socketStatus.onmessage = (event) => {
-            setStatusList(JSON.parse(event.data))
+        const connectSockets = async () => {
+            try {
+                await instance.get('/user/session')
+            } catch {
+                if (!shouldCloseSockets) handleInvalidSession()
+                return
+            }
+
+            if (shouldCloseSockets) return
+
+            const websocketToken = encodeURIComponent(token)
+            socketNotifications = new WebSocket(`${import.meta.env.VITE_WS_API}/notifications?token=${websocketToken}`)
+            socketStatus = new WebSocket(`${import.meta.env.VITE_WS_API}/status?token=${websocketToken}`)
+
+            socketNotifications.onmessage = (event) => {
+                const data = JSON.parse(event.data)
+                setSuccessAlert(data.message)
+                if (data.message.includes("Match with ")) {
+                    setIsConfettiVisible(true)
+                    setTimeout(() => setIsConfettiVisible(false), 5000)
+                }
+            }
+
+            socketStatus.onmessage = (event) => {
+                setStatusList(JSON.parse(event.data))
+            }
         }
 
+        connectSockets()
+
         return () => {
+            shouldCloseSockets = true
             socketNotifications?.close()
             socketStatus?.close()
         }
-    }, [setStatusList, setSuccessAlert])
+    }, [location.pathname, navigate, setStatusList, setSuccessAlert])
 
     const handleLogout = async () => {
         await instance.post('/user/logout').then(() => {

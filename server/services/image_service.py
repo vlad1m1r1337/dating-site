@@ -2,7 +2,9 @@ import magic
 import uuid
 
 from responses.errors.errors_400 import image_invalid, missing_body, too_many_images
+from responses.errors.errors_404 import image_not_found
 from responses.success.success_201 import image_success
+from responses.success.success_200 import success_200
 
 MAX_IMAGE_SIZE = 5 * 1024 * 1024  # 5MB
 MAX_IMAGES_PER_USER = 5
@@ -13,11 +15,7 @@ async def image_upload(db, user, form):
     if "image" not in form:
         return missing_body()
 
-    # Проверяем количество уже загруженных картинок
-    count = await db.fetchval(
-        "SELECT COUNT(*) FROM images WHERE user_id = $1", user["id"]
-    )
-    if count >= MAX_IMAGES_PER_USER:
+    if len(user["images"] or []) >= MAX_IMAGES_PER_USER:
         return too_many_images()
 
     image = await form["image"].read()
@@ -43,3 +41,26 @@ async def image_upload(db, user, form):
         image,
     )
     return image_success(url=f"{image_id}")
+
+
+async def image_delete(db, user, image_id):
+    try:
+        parsed_image_id = uuid.UUID(image_id)
+    except ValueError:
+        return image_not_found()
+
+    image = await db.fetchrow(
+        "SELECT id FROM images WHERE id = $1 AND user_id = $2",
+        parsed_image_id,
+        user["id"],
+    )
+    if not image:
+        return image_not_found()
+
+    await db.execute(
+        "UPDATE users SET images = array_remove(images, $1) WHERE id = $2",
+        parsed_image_id,
+        user["id"],
+    )
+    await db.execute("DELETE FROM images WHERE id = $1", parsed_image_id)
+    return success_200()

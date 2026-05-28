@@ -1,4 +1,3 @@
-import AvatarPlaceholder from './AvatarPlaceholder'
 import LikeList from './LikeList'
 import Chat from './Chat'
 import Browsing from './Browsing'
@@ -17,20 +16,14 @@ const MenuContent = ({ menuValue, setErrorAlert, setSuccessAlert, statusList }: 
         case 'discover':
             return <Browsing setSuccessAlert={setSuccessAlert} setErrorAlert={setErrorAlert} statusList={statusList} />
         case 'likes':
-            return <LikeList setSuccessAlert={setSuccessAlert} likesOrViews="likes" refresh={true} statusList={statusList} />
+        case 'views':
+            return <LikeList setSuccessAlert={setSuccessAlert} likesOrViews={menuValue === 'likes' ? 'likes' : 'views'} refresh={menuValue === 'likes'} statusList={statusList} />
         case 'chat':
             return <Chat statusList={statusList} />
-        case 'views':
-            return <LikeList setSuccessAlert={setSuccessAlert} likesOrViews="views" refresh={false} statusList={statusList} />
         case 'search':
             return <Search setSuccessAlert={setSuccessAlert} setErrorAlert={setErrorAlert} statusList={statusList} />
         default:
-            return (
-                <>
-                    <h1 className="text-center">On forge dur ici</h1>
-                    <AvatarPlaceholder className="w-100" />
-                </>
-            )
+            return null
     }
 }
 
