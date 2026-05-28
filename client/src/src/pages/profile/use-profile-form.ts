@@ -61,10 +61,25 @@ export const useProfileForm = (
         setForm(prev => ({ ...prev, [event.target.name]: parseInt(event.target.value) }))
     }
 
-    const handleDeleteImg = (index: number) => {
-        const images = _.cloneDeep(form.images)
-        images.splice(index, 1)
-        setForm(prev => ({ ...prev, images }))
+    const handleDeleteImg = async (index: number) => {
+        const image = form.images[index]
+        const imageId = image?.split('/image/')[1]
+        if (!imageId) {
+            return
+        }
+
+        setImagesAreLoading(prev => [...prev, index])
+        await instance.delete(`/image/${imageId}`).then(() => {
+            setForm(prev => {
+                const images = _.cloneDeep(prev.images)
+                images.splice(index, 1)
+                return { ...prev, images }
+            })
+        }).catch((error) => {
+            setErrorAlert(humanizeApiError(error?.response?.data?.message || 'Could not delete image'))
+        }).finally(() => {
+            setImagesAreLoading(prev => prev.filter(loadingIndex => loadingIndex !== index))
+        })
     }
 
     const handleDragImg = (dragIndex: number, dropIndex: number) => {
