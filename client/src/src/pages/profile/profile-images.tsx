@@ -1,5 +1,6 @@
 import { RefObject } from 'react'
-import { Badge, CircularProgress, Grid, Typography } from '@mui/material'
+import { CircularProgress, Grid, IconButton, Typography } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 import addImage from '../../../assets/add-image2.png'
 import goose from '../../../assets/goose.jpg'
 
@@ -47,20 +48,27 @@ const ProfileImages = ({
                         }}
                     >
                         {imagesAreLoading.includes(index) && <CircularProgress color="secondary" />}
-                        <Badge
-                            color="error"
-                            badgeContent={<p className="badgeCross" role="button" style={{ cursor: 'pointer' }} onClick={(event) => { event.stopPropagation(); handleDeleteImg(index) }}>x</p>}
-                            style={{ display: isSubmitting || imagesAreLoading.includes(index) ? 'none' : 'block' }}
-                        >
-                            <img
-                                src={image}
-                                alt="profile"
-                                className="imgMosaic"
-                                onError={(event) => { event.currentTarget.src = goose }}
-                                onLoad={() => handleImageLoad(index)}
-                                loading="lazy"
-                            />
-                        </Badge>
+                        <img
+                            src={image}
+                            alt="profile"
+                            className="imgMosaic imgMosaicProfile"
+                            onError={(event) => { event.currentTarget.src = goose }}
+                            onLoad={() => handleImageLoad(index)}
+                            loading="lazy"
+                        />
+                        {!isSubmitting && !imagesAreLoading.includes(index) && (
+                            <IconButton
+                                aria-label="Delete photo"
+                                className="imgDeleteButton"
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    handleDeleteImg(index)
+                                }}
+                                size="small"
+                            >
+                                <CloseIcon fontSize="small" />
+                            </IconButton>
+                        )}
                     </Grid>
                 ))}
                 {images.length < 5 && (
