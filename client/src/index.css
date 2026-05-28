@@ -39,6 +39,12 @@ body::-webkit-scrollbar { display: none; }
   margin-bottom: 56px;
 }
 
+.profileViewer .profileImageCard {
+  position: relative;
+  overflow: hidden;
+  border-radius: 6px;
+}
+
 .profileViewer .status {
   position: absolute;
   top: 10px;
@@ -81,6 +87,31 @@ body::-webkit-scrollbar { display: none; }
   min-width: 0 !important;
 }
 .profileViewer .nextPhotoButton:hover { background-color: rgba(0,0,0,0.4); }
+
+.profileViewer .previousImageButton,
+.profileViewer .nextImageButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #fff;
+  border-radius: 50%;
+  background-color: rgba(0,0,0,0.45);
+  min-width: 36px !important;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+}
+
+.profileViewer .previousImageButton {
+  left: 10px;
+}
+
+.profileViewer .nextImageButton {
+  right: 10px;
+}
+
+.profileViewer .previousImageButton:hover,
+.profileViewer .nextImageButton:hover { background-color: rgba(0,0,0,0.65); }
 
 .profileViewer .skipLikeButtons {
   display: flex;

@@ -65,17 +65,13 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 		})
 	}
 
-	const handlePrevious = () => {
-		if (previousProfile) {
-			previousProfile()
-			return
-		}
+	const handlePreviousPhoto = () => {
 		setImageIndex((prev) => {
 			if (!profile?.images.length) {
 				return 0
 			}
 
-			if (prev - 1 < 0) {
+			if (prev === 0) {
 				return profile.images.length - 1
 			}
 
@@ -83,12 +79,26 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 		})
 	}
 
+	const handleNextPhoto = () => {
+		setImageIndex(prev => profile?.images.length ? (prev + 1) % profile.images.length : 0)
+	}
+
+	const handlePrevious = () => {
+		if (previousProfile) {
+			previousProfile()
+			return
+		}
+
+		handlePreviousPhoto()
+	}
+
 	const handleNext = () => {
 		if (nextProfile) {
 			nextProfile()
 			return
 		}
-		setImageIndex(profile?.images.length ? (imageIndex + 1) % profile.images.length : 0)
+
+		handleNextPhoto()
 	}
 
 	useEffect(() => {
@@ -108,6 +118,9 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 
 		return goose
 	}
+
+	const hasProfileNavigation = Boolean(previousProfile || nextProfile)
+	const hasPhotoNavigation = Boolean(profile?.images.length && profile.images.length > 1)
 
 	return (
 		<div className="profileViewer">
@@ -132,17 +145,29 @@ const ProfileViewer = ({ profileToGetId, likeProfile, skipProfile, reportProfile
 						}}
 					/>
 					<div className="position-relative">
-						<img src={getCurrentImageSrc()} alt="imgProfile" className="imgProfile" loading="lazy" onError={(e) => { e.currentTarget.src = goose }} />
-						{statusList && statusList.users && statusList.users.includes(profile.id) ?
-							<Chip label="Online" className="status" icon={<CircleIcon style={{ color: "#4CAF50" }} sx={{ height: "12px", width: "12px" }} />} />
-							:
-							<Chip label={lastActivity(profile.last_login)} className="status" icon={<CircleIcon style={{ color: "#FF0000" }} sx={{ height: "12px", width: "12px" }} />} />
-						}
-						{reportProfile &&
-							<Button className="reportButton" title="Report this profile" onClick={() => { setIsReportModalOpened(true) }}>
-								<ReportIcon fontSize="large" />
-							</Button>
-						}
+						<div className="profileImageCard">
+							<img src={getCurrentImageSrc()} alt="imgProfile" className="imgProfile" loading="lazy" onError={(e) => { e.currentTarget.src = goose }} />
+							{statusList && statusList.users && statusList.users.includes(profile.id) ?
+								<Chip label="Online" className="status" icon={<CircleIcon style={{ color: "#4CAF50" }} sx={{ height: "12px", width: "12px" }} />} />
+								:
+								<Chip label={lastActivity(profile.last_login)} className="status" icon={<CircleIcon style={{ color: "#FF0000" }} sx={{ height: "12px", width: "12px" }} />} />
+							}
+							{reportProfile &&
+								<Button className="reportButton" title="Report this profile" onClick={() => { setIsReportModalOpened(true) }}>
+									<ReportIcon fontSize="large" />
+								</Button>
+							}
+							{hasProfileNavigation && hasPhotoNavigation &&
+								<>
+									<Button className="previousImageButton" onClick={handlePreviousPhoto} title="Previous photo" disabled={isHandlingInteraction}>
+										<NavigateBeforeIcon fontSize="medium" />
+									</Button>
+									<Button className="nextImageButton" onClick={handleNextPhoto} title="Next photo" disabled={isHandlingInteraction}>
+										<NavigateNextIcon fontSize="medium" />
+									</Button>
+								</>
+							}
+						</div>
 						<Button className="beforePhotoButton" onClick={handlePrevious} title={previousProfile ? "Previous profile" : "Previous photo"} disabled={isHandlingInteraction}>
 							<NavigateBeforeIcon className="me-2" fontSize="large" />
 						</Button>
