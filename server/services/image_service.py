@@ -13,11 +13,7 @@ async def image_upload(db, user, form):
     if "image" not in form:
         return missing_body()
 
-    # Проверяем количество уже загруженных картинок
-    count = await db.fetchval(
-        "SELECT COUNT(*) FROM images WHERE user_id = $1", user["id"]
-    )
-    if count >= MAX_IMAGES_PER_USER:
+    if len(user["images"] or []) >= MAX_IMAGES_PER_USER:
         return too_many_images()
 
     image = await form["image"].read()

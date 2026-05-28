@@ -101,10 +101,9 @@ export const useProfileForm = (
 
     const getUser = useCallback(async () => {
         await instance.get<UserModel>('/user').then((res) => {
-            const imageLoadingIndexes = res.data.images.map((_image, index) => index)
             const filteredData = _.omit(res.data, ['id', 'username', 'completion', 'last_login']) as UpdateForm
             filteredData.images = filteredData.images.map((img) => `${import.meta.env.VITE_URL_API}/image/${img}`)
-            setImagesAreLoading(imageLoadingIndexes)
+            setImagesAreLoading([])
             setForm(filteredData)
 
             const parsedGeoloc = filteredData.geoloc.split(',')
@@ -129,14 +128,10 @@ export const useProfileForm = (
     const handleImgUpload = async (file: File) => {
         const formData = new FormData()
         formData.append('image', file)
-        await instance.post('/image/upload', formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        }).then((res) => {
+        await instance.post('/image/upload', formData).then((res) => {
             setForm(prev => ({ ...prev, images: [...prev.images, `${import.meta.env.VITE_URL_API}/image/${res.data.url}`] }))
-        }).catch(() => {
-            setErrorAlert('Could not upload image')
+        }).catch((error) => {
+            setErrorAlert(humanizeApiError(error?.response?.data?.message || 'Could not upload image'))
         })
     }
 
