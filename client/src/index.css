@@ -147,10 +147,6 @@ body::-webkit-scrollbar { display: none; }
 .profileViewer .oneInteractionButton {
   display: flex;
   justify-content: center;
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
   padding: 4px;
   border-radius: 360px;
   border: 1px solid white;
