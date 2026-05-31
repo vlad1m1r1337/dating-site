@@ -1,4 +1,4 @@
-import { Box, Button, Typography } from '@mui/material'
+import { Box, Button, IconButton, Tooltip, Typography } from '@mui/material'
 import { LatLngExpression } from 'leaflet'
 import { MapContainer, TileLayer } from 'react-leaflet'
 import LocationOnIcon from '@mui/icons-material/LocationOn'
@@ -44,17 +44,27 @@ const ProfileLocation = ({
                             setMapView={setMapView}
                         />
                     </MapContainer>
-                    <div className="position-absolute bottom-0 end-0" style={{ zIndex: 1000, marginBottom: '64px', marginRight: '10px' }} >
-                        <LocationSearchingIcon
-                            onClick={() => setMapView(currentPosition)}
-                            style={{ backgroundColor: 'white', borderRadius: '50%', padding: '5px', width: '35px', height: '35px', cursor: 'pointer' }}
-                        />
+                    <div className="position-absolute bottom-0 end-0" style={{ zIndex: 1000, marginBottom: '64px', marginRight: '10px' }}>
+                        <Tooltip title="Center map on selected location">
+                            <IconButton
+                                aria-label="Center map on selected location"
+                                onClick={() => setMapView(currentPosition)}
+                                style={{ backgroundColor: 'white', width: '35px', height: '35px' }}
+                            >
+                                <LocationSearchingIcon style={{ padding: '5px' }} />
+                            </IconButton>
+                        </Tooltip>
                     </div>
                     <div className="position-absolute bottom-0 end-0" style={{ zIndex: 1000, marginBottom: '22px', marginRight: '10px' }}>
-                        <LocationOnIcon
-                            onClick={getLocation}
-                            style={{ backgroundColor: 'white', borderRadius: '50%', padding: '5px', width: '35px', height: '35px', cursor: 'pointer' }}
-                        />
+                        <Tooltip title="Use my current location">
+                            <IconButton
+                                aria-label="Use my current location"
+                                onClick={getLocation}
+                                style={{ backgroundColor: 'white', width: '35px', height: '35px' }}
+                            >
+                                <LocationOnIcon style={{ padding: '5px' }} />
+                            </IconButton>
+                        </Tooltip>
                     </div>
                 </div>
             )}
