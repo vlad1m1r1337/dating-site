@@ -330,7 +330,8 @@ body::-webkit-scrollbar { display: none; }
 }
 
 .imgMosaicOverlayText {
-  text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+  color: #fff !important;
+  mix-blend-mode: difference;
 }
 
 .draggableImgMosaicContainer {
