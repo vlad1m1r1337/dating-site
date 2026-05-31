@@ -5,7 +5,7 @@ import magic
 from database.database import *
 from responses.errors.errors_401 import authentication_required, incomplete_profile
 from responses.errors.errors_404 import image_not_found
-from services.image_service import image_delete, image_upload
+from services.image_service import image_delete, image_order_update, image_upload
 from services.user_service import (
     ask_reset_password,
     get_token,
@@ -22,6 +22,7 @@ from schemas import (
     bearer_security,
     auth_responses,
     body_responses,
+    UpdateImageOrderRequest,
 )
 
 image_controller = APIRouter(prefix="/image", tags=["image"])
@@ -74,6 +75,40 @@ async def upload_image(request: Request, db=Depends(get_database)):
     if user["completion"] < 1:
         return incomplete_profile()
     return await image_upload(db, user, data["form"])
+
+
+@image_controller.put(
+    "/order",
+    summary="Изменить порядок изображений пользователя",
+    description="Сохраняет новый порядок уже загруженных изображений текущего пользователя.",
+    response_model=MessageResponse,
+    responses={**auth_responses, **body_responses},
+    openapi_extra={
+        "security": bearer_security,
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": UpdateImageOrderRequest.model_json_schema(),
+                }
+            },
+        },
+    },
+)
+async def update_image_order(request: Request, db=Depends(get_database)):
+    data = await parse_request(request)
+    validator = body_validator(data["body"], ["images"])
+    if validator is not None:
+        return validator
+    token = get_token(data["headers"])
+    if token is None:
+        return empty_token()
+    user = await search_user_by_token(db, token)
+    if not user:
+        return authentication_required()
+    if user["completion"] < 1:
+        return incomplete_profile()
+    return await image_order_update(db, user, data["body"]["images"])
 
 
 @image_controller.delete(

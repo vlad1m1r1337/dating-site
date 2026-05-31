@@ -12,7 +12,7 @@ interface ProfileImagesProps {
     showRequiredErrors: boolean
     hasImagesError: boolean
     handleDeleteImg: (index: number) => void
-    handleDragImg: (dragIndex: number, dropIndex: number) => void
+    handleDragImg: (dragIndex: number, dropIndex: number) => Promise<void>
     handleImageLoad: (index: number) => void
     onChangeImg: (files: FileList | null) => Promise<void>
 }
@@ -44,7 +44,7 @@ const ProfileImages = ({
                         onDragOver={(event) => event.preventDefault()}
                         onDrop={(event) => {
                             event.preventDefault()
-                            handleDragImg(Number(event.dataTransfer.getData('text/plain')), index)
+                            void handleDragImg(Number(event.dataTransfer.getData('text/plain')), index)
                         }}
                     >
                         {imagesAreLoading.includes(index) && <CircularProgress color="secondary" />}

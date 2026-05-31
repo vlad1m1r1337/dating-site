@@ -67,7 +67,7 @@ const ChatRoomView = ({
                     borderRadius: '6px',
                 }}
             >
-                <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }} ref={chatBoxRef}>
+                <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'auto', p: 2 }} ref={chatBoxRef}>
                     {room.messages.map((message) => {
                         const isPeerMessage = message.user_id === room.user_2.id
                         const avatarSrc = isPeerMessage ? getAvatarSrc(room.user_2?.image) : getAvatarSrc(room.user_1?.image)
@@ -116,6 +116,9 @@ const ChatRoomView = ({
                         sx={{
                             '& .MuiInputBase-input': { color: '#000' },
                             '& .MuiInputBase-input::placeholder': { color: '#000', opacity: 1 },
+                            '& .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': { borderColor: '#000' },
+                            '& .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline': { borderColor: '#000' },
+                            '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': { borderColor: '#000' },
                         }}
                         value={messageText}
                         onChange={(event) => setMessageText(event.target.value)}

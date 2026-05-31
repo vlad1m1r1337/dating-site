@@ -25,6 +25,16 @@ const defaultForm: UpdateForm = {
     elo: 0,
 }
 
+const getImageId = (image: string) => image.split('/image/')[1] || image
+
+const haveSameImageIds = (imageIds: string[], savedImageIds: string[]) => {
+    if (imageIds.length !== savedImageIds.length) {
+        return false
+    }
+
+    return imageIds.every((imageId) => savedImageIds.includes(imageId))
+}
+
 export const useProfileForm = (
     setErrorAlert: (message: string) => void,
     setSuccessAlert: (message: string) => void,
@@ -38,6 +48,8 @@ export const useProfileForm = (
     const [currentPosition, setCurrentPosition] = useState<LatLngExpression>({ lat: 0, lng: 0 })
     const mapRef = useRef<L.Map>(null)
     const imageInputRef = useRef<HTMLInputElement>(null)
+    const isSavingImageOrderRef = useRef(false)
+    const savedImageIdsRef = useRef<string[]>([])
     const navigate = useNavigate()
 
     const hasEmailError = !form.email.length || !validator.isEmail(form.email)
@@ -63,13 +75,14 @@ export const useProfileForm = (
 
     const handleDeleteImg = async (index: number) => {
         const image = form.images[index]
-        const imageId = image?.split('/image/')[1]
+        const imageId = image ? getImageId(image) : ''
         if (!imageId) {
             return
         }
 
         setImagesAreLoading(prev => [...prev, index])
         await instance.delete(`/image/${imageId}`).then(() => {
+            savedImageIdsRef.current = savedImageIdsRef.current.filter((savedImageId) => savedImageId !== imageId)
             setForm(prev => {
                 const images = _.cloneDeep(prev.images)
                 images.splice(index, 1)
@@ -82,12 +95,15 @@ export const useProfileForm = (
         })
     }
 
-    const handleDragImg = (dragIndex: number, dropIndex: number) => {
+    const handleDragImg = async (dragIndex: number, dropIndex: number) => {
         const isInvalidDrag = Number.isNaN(dragIndex)
             || dragIndex < 0
             || dragIndex >= form.images.length
+            || dropIndex < 0
+            || dropIndex >= form.images.length
             || dragIndex === dropIndex
             || isSubmitting
+            || isSavingImageOrderRef.current
             || imagesAreLoading.includes(dragIndex)
             || imagesAreLoading.includes(dropIndex)
 
@@ -95,10 +111,28 @@ export const useProfileForm = (
             return
         }
 
+        const currentImageIds = form.images.map(getImageId)
+        if (!haveSameImageIds(currentImageIds, savedImageIdsRef.current)) {
+            setErrorAlert('Please save your profile before changing image order')
+            return
+        }
+
         const images = _.cloneDeep(form.images)
         const [draggedImage] = images.splice(dragIndex, 1)
         images.splice(dropIndex, 0, draggedImage)
+        const imageIds = images.map(getImageId)
         setForm(prev => ({ ...prev, images }))
+        isSavingImageOrderRef.current = true
+        await instance.put('/image/order', {
+            images: imageIds,
+        }).then(() => {
+            savedImageIdsRef.current = imageIds
+        }).catch((error) => {
+            setForm(prev => ({ ...prev, images: form.images }))
+            setErrorAlert(humanizeApiError(error?.response?.data?.message || 'Could not update image order'))
+        }).finally(() => {
+            isSavingImageOrderRef.current = false
+        })
     }
 
     const handleTagChange = (key: string, value: boolean) => {
@@ -118,6 +152,7 @@ export const useProfileForm = (
         await instance.get<UserModel>('/user').then((res) => {
             const filteredData = _.omit(res.data, ['id', 'username', 'completion', 'last_login']) as UpdateForm
             filteredData.images = filteredData.images.map((img) => `${import.meta.env.VITE_URL_API}/image/${img}`)
+            savedImageIdsRef.current = filteredData.images.map(getImageId)
             setImagesAreLoading([])
             setForm(filteredData)
 
@@ -170,8 +205,9 @@ export const useProfileForm = (
         if (!formToSend.bio) {
             formToSend.bio = ' '
         }
-        formToSend.images = formToSend.images.map((img) => img.split('/image/')[1])
+        formToSend.images = formToSend.images.map(getImageId)
         await instance.put('/user', formToSend).then(() => {
+            savedImageIdsRef.current = formToSend.images
             setSuccessAlert('Profile updated')
             getUser()
         }).catch((err) => {

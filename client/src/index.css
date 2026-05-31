@@ -147,10 +147,6 @@ body::-webkit-scrollbar { display: none; }
 .profileViewer .oneInteractionButton {
   display: flex;
   justify-content: center;
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
   padding: 4px;
   border-radius: 360px;
   border: 1px solid white;
@@ -268,12 +264,23 @@ body::-webkit-scrollbar { display: none; }
   margin-bottom: 56px;
 }
 
+.chatParent,
+.chatChannel {
+  height: 100%;
+  min-height: 0;
+}
+
+.chatChannel {
+  display: flex;
+  flex-direction: column;
+}
+
 .chatBox {
   width: 100%;
   display: flex;
-  overflow-y: scroll;
-  height: 670px;
-  margin-bottom: 56px;
+  min-height: 0;
+  overflow: hidden;
+  flex: 1;
 }
 
 .profileList {
@@ -334,7 +341,8 @@ body::-webkit-scrollbar { display: none; }
 }
 
 .imgMosaicOverlayText {
-  text-shadow: 0 1px 6px rgba(0,0,0,0.85);
+  color: #fff !important;
+  mix-blend-mode: difference;
 }
 
 .draggableImgMosaicContainer {
