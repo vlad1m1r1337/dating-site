@@ -44,6 +44,10 @@ class UpdateProfileRequest(BaseModel):
     )
 
 
+class UpdateImageOrderRequest(BaseModel):
+    images: list[str] = Field(default_factory=list, description="Новый порядок id картинок пользователя")
+
+
 class ReportRequest(BaseModel):
     message: str = Field(..., min_length=1, examples=["Fake account"])
 

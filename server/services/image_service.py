@@ -64,3 +64,27 @@ async def image_delete(db, user, image_id):
     )
     await db.execute("DELETE FROM images WHERE id = $1", parsed_image_id)
     return success_200()
+
+
+async def image_order_update(db, user, image_ids):
+    try:
+        parsed_image_ids = [uuid.UUID(image_id) for image_id in image_ids]
+    except ValueError:
+        return image_invalid()
+
+    if len(parsed_image_ids) > MAX_IMAGES_PER_USER:
+        return too_many_images()
+
+    if len(set(parsed_image_ids)) != len(parsed_image_ids):
+        return image_invalid()
+
+    current_image_ids = set(user["images"] or [])
+    if set(parsed_image_ids) != current_image_ids:
+        return image_invalid()
+
+    await db.execute(
+        "UPDATE users SET images = $1 WHERE id = $2",
+        parsed_image_ids,
+        user["id"],
+    )
+    return success_200()
